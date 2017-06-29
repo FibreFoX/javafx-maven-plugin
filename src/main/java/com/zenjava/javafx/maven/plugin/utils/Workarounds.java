@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.zenjava.javafx.maven.plugin;
+package com.zenjava.javafx.maven.plugin.utils;
 
 import com.oracle.tools.packager.Bundler;
 import com.oracle.tools.packager.IOUtils;
 import com.oracle.tools.packager.RelativeFileSet;
 import com.oracle.tools.packager.StandardBundlerParam;
+import com.zenjava.javafx.maven.plugin.NativeLauncher;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;

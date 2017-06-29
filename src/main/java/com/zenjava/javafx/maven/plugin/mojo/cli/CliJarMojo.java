@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.zenjava.javafx.maven.plugin;
+package com.zenjava.javafx.maven.plugin.mojo.cli;
+
+import com.zenjava.javafx.maven.plugin.mojo.lifecycle.JarMojo;
 
 /**
  * Builds an executable JAR for the project that has all the trappings needed to run as a JavaFX app. This will

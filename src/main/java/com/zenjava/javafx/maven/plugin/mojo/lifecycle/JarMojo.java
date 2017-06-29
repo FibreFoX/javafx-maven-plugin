@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.zenjava.javafx.maven.plugin;
+package com.zenjava.javafx.maven.plugin.mojo.lifecycle;
 
+import com.zenjava.javafx.maven.plugin.utils.JavaDetectionTools;
 import com.sun.javafx.tools.packager.CreateJarParams;
 import com.sun.javafx.tools.packager.PackagerException;
+import com.zenjava.javafx.maven.plugin.AbstractJfxToolsMojo;
 
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Dependency;

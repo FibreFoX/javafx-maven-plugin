@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.zenjava.javafx.maven.plugin;
+package com.zenjava.javafx.maven.plugin.mojo.lifecycle;
 
+import com.zenjava.javafx.maven.plugin.utils.Workarounds;
 import com.oracle.tools.packager.AbstractBundler;
 import com.oracle.tools.packager.Bundler;
 import com.oracle.tools.packager.Bundlers;
@@ -28,6 +29,9 @@ import com.oracle.tools.packager.windows.WinExeBundler;
 import com.oracle.tools.packager.windows.WinMsiBundler;
 import com.sun.javafx.tools.packager.PackagerException;
 import com.sun.javafx.tools.packager.SignJarParams;
+import com.zenjava.javafx.maven.plugin.AbstractJfxToolsMojo;
+import com.zenjava.javafx.maven.plugin.FileAssociation;
+import com.zenjava.javafx.maven.plugin.NativeLauncher;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 

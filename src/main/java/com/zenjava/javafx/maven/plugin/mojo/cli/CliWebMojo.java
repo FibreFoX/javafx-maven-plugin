@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.zenjava.javafx.maven.plugin;
+package com.zenjava.javafx.maven.plugin.mojo.cli;
+
+import com.zenjava.javafx.maven.plugin.mojo.lifecycle.WebMojo;
 
 /**
  * Generates web deployment bundles (applet and webstart). This Mojo simply wraps the JavaFX packaging tools
