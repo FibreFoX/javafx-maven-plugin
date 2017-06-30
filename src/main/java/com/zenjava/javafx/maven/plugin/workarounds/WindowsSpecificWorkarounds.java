@@ -15,10 +15,29 @@
  */
 package com.zenjava.javafx.maven.plugin.workarounds;
 
+import java.io.File;
+import org.apache.maven.plugin.logging.Log;
+
 /**
  *
  * @author FibreFoX
  */
 public class WindowsSpecificWorkarounds {
 
+    protected Log logger;
+    protected File nativeOutputDir;
+
+    public WindowsSpecificWorkarounds(File nativeOutputDir, Log logger) {
+        this.logger = logger;
+        this.nativeOutputDir = nativeOutputDir;
+    }
+
+    protected Log getLog() {
+        return logger;
+    }
+
+    public boolean isWorkaroundForBug182Needed() {
+        // jnlp-bundler uses RelativeFileSet, and generates system-dependent dividers (\ on windows, / on others)
+        return File.separator.equals("\\");
+    }
 }

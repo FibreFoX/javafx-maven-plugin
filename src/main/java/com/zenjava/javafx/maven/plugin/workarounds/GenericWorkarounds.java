@@ -36,17 +36,17 @@ import org.apache.maven.plugin.logging.Log;
  */
 public class GenericWorkarounds {
 
-    private static final String JNLP_JAR_PATTERN = "(.*)href=(\".*?\")(.*)size=(\".*?\")(.*)";
+    protected static final String JNLP_JAR_PATTERN = "(.*)href=(\".*?\")(.*)size=(\".*?\")(.*)";
 
-    private Log logger;
-    private File nativeOutputDir;
+    protected Log logger;
+    protected File nativeOutputDir;
 
     public GenericWorkarounds(File nativeOutputDir, Log logger) {
         this.logger = logger;
         this.nativeOutputDir = nativeOutputDir;
     }
 
-    public Log getLog() {
+    protected Log getLog() {
         return logger;
     }
 
@@ -56,9 +56,8 @@ public class GenericWorkarounds {
         return JavaDetectionTools.IS_JAVA_8 && JavaDetectionTools.isAtLeastOracleJavaUpdateVersion(60) && !JavaDetectionTools.isAtLeastOracleJavaUpdateVersion(92);
     }
 
-    public boolean isWorkaroundForBug182Needed() {
-        // jnlp-bundler uses RelativeFileSet, and generates system-dependent dividers (\ on windows, / on others)
-        return File.separator.equals("\\");
+    public boolean isWorkaroundForBug185Needed(Map<String, Object> params) {
+        return params.containsKey("jnlp.allPermisions") && Boolean.parseBoolean(String.valueOf(params.get("jnlp.allPermisions")));
     }
 
     public List<File> getGeneratedJNLPFiles() {

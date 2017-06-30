@@ -35,6 +35,7 @@ import com.zenjava.javafx.maven.plugin.NativeLauncher;
 import com.zenjava.javafx.maven.plugin.workarounds.GenericWorkarounds;
 import com.zenjava.javafx.maven.plugin.workarounds.LinuxSpecificWorkarounds;
 import com.zenjava.javafx.maven.plugin.workarounds.MacSpecificWorkarounds;
+import com.zenjava.javafx.maven.plugin.workarounds.WindowsSpecificWorkarounds;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
@@ -114,7 +115,7 @@ public class NativeMojo extends AbstractJfxToolsMojo {
      *
      * @parameter property="jfx.bundler" default-value="ALL"
      */
-    private String bundler;
+    protected String bundler;
 
     /**
      * Properties passed to the Java Virtual Machine when the application is started (i.e. these properties are system
@@ -122,7 +123,7 @@ public class NativeMojo extends AbstractJfxToolsMojo {
      *
      * @parameter property="jfx.jvmProperties"
      */
-    private Map<String, String> jvmProperties;
+    protected Map<String, String> jvmProperties;
 
     /**
      * JVM Flags to be passed into the JVM at invocation time. These are the arguments to the left of the main class
@@ -135,7 +136,7 @@ public class NativeMojo extends AbstractJfxToolsMojo {
      *
      * @parameter property="jfx.jvmArgs"
      */
-    private List<String> jvmArgs;
+    protected List<String> jvmArgs;
 
     /**
      * Optional command line arguments passed to the application when it is started. These will be included in the
@@ -147,14 +148,14 @@ public class NativeMojo extends AbstractJfxToolsMojo {
      *
      * @parameter property="jfx.userJvmArgs"
      */
-    private Map<String, String> userJvmArgs;
+    protected Map<String, String> userJvmArgs;
 
     /**
      * You can specify arguments that gonna be passed when calling your application.
      *
      * @parameter property="jfx.launcherArguments"
      */
-    private List<String> launcherArguments;
+    protected List<String> launcherArguments;
 
     /**
      * The release version as passed to the native installer. It would be nice to just use the project's version number
@@ -166,7 +167,7 @@ public class NativeMojo extends AbstractJfxToolsMojo {
      *
      * @parameter property="jfx.nativeReleaseVersion" default-value="1.0"
      */
-    private String nativeReleaseVersion;
+    protected String nativeReleaseVersion;
 
     /**
      * Set this to true if you would like your application to have a shortcut on the users desktop (or platform
@@ -462,12 +463,10 @@ public class NativeMojo extends AbstractJfxToolsMojo {
     protected boolean skipKeypassWhileSigning = false;
 
     protected Workarounds workarounds = null;
+    protected WindowsSpecificWorkarounds windowsSpecificWorkarounds = null;
     protected LinuxSpecificWorkarounds linuxSpecificWorkarounds = null;
     protected MacSpecificWorkarounds macSpecificWorkarounds = null;
     protected GenericWorkarounds genericWorkarounds = null;
-
-    private static final String CFG_WORKAROUND_MARKER = "cfgWorkaroundMarker";
-    private static final String CFG_WORKAROUND_DONE_MARKER = CFG_WORKAROUND_MARKER + ".done";
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -484,6 +483,7 @@ public class NativeMojo extends AbstractJfxToolsMojo {
         getLog().info("Building Native Installers");
 
         workarounds = new Workarounds(nativeOutputDir, getLog());
+        windowsSpecificWorkarounds = new WindowsSpecificWorkarounds(nativeOutputDir, getLog());
         linuxSpecificWorkarounds = new LinuxSpecificWorkarounds(nativeOutputDir, getLog());
         macSpecificWorkarounds = new MacSpecificWorkarounds(nativeOutputDir, getLog());
         genericWorkarounds = new GenericWorkarounds(nativeOutputDir, getLog());
@@ -757,8 +757,7 @@ public class NativeMojo extends AbstractJfxToolsMojo {
         }
     }
 
-    private void applyWorkaroundsAfterBundling(String currentRunningBundlerID, Map<String, ? super Object> params) throws PackagerException, MojoFailureException, MojoExecutionException {
-
+    protected void applyWorkaroundsAfterBundling(String currentRunningBundlerID, Map<String, ? super Object> params) throws PackagerException, MojoFailureException, MojoExecutionException {
         // Workaround for "Native package for Ubuntu doesn't work"
         // https://github.com/javafx-maven-plugin/javafx-maven-plugin/issues/124
         // real bug: linux-launcher from oracle-jdk starting from 1.8.0u40 logic to determine .cfg-filename
@@ -768,10 +767,10 @@ public class NativeMojo extends AbstractJfxToolsMojo {
                 if( !skipNativeLauncherWorkaround124 ){
                     linuxSpecificWorkarounds.applyWorkaroundForCfgFileName(appName, secondaryLaunchers);
                     // only apply workaround for issue 205 when having workaround for issue 124 active
-                    if( Boolean.parseBoolean(String.valueOf(params.get(CFG_WORKAROUND_MARKER))) && !Boolean.parseBoolean((String) params.get(CFG_WORKAROUND_DONE_MARKER)) ){
+                    if( Boolean.parseBoolean(String.valueOf(params.get(LinuxSpecificWorkarounds.CFG_WORKAROUND_MARKER))) && !Boolean.parseBoolean((String) params.get(LinuxSpecificWorkarounds.CFG_WORKAROUND_DONE_MARKER)) ){
                         getLog().info("Preparing workaround for oracle-jdk-bug since 1.8.0u40 regarding native linux launcher(s) inside native linux installers.");
                         linuxSpecificWorkarounds.applyWorkaroundForCfgFileNameInsideInstallers(appName, secondaryLaunchers, params);
-                        params.put(CFG_WORKAROUND_DONE_MARKER, "true");
+                        params.put(LinuxSpecificWorkarounds.CFG_WORKAROUND_DONE_MARKER, "true");
                     }
                 } else {
                     getLog().info("Skipped workaround for native linux launcher(s).");
@@ -780,7 +779,7 @@ public class NativeMojo extends AbstractJfxToolsMojo {
         }
 
         if( "jnlp".equals(currentRunningBundlerID) ){
-            if( genericWorkarounds.isWorkaroundForBug182Needed() ){
+            if( windowsSpecificWorkarounds.isWorkaroundForBug182Needed() ){
                 // Workaround for "JNLP-generation: path for dependency-lib on windows with backslash"
                 // https://github.com/javafx-maven-plugin/javafx-maven-plugin/issues/182
                 getLog().info("Applying workaround for oracle-jdk-bug since 1.8.0u60 regarding jar-path inside generated JNLP-files.");
@@ -794,7 +793,7 @@ public class NativeMojo extends AbstractJfxToolsMojo {
             // Do sign generated jar-files by calling the packager (this might change in the future,
             // hopefully when oracle reworked the process inside the JNLP-bundler)
             // https://github.com/javafx-maven-plugin/javafx-maven-plugin/issues/185
-            if( workarounds.isWorkaroundForBug185Needed(params) ){
+            if( genericWorkarounds.isWorkaroundForBug185Needed(params) ){
                 getLog().info("Signing jar-files referenced inside generated JNLP-files.");
                 if( !skipSigningJarFilesJNLP185 ){
                     // JavaFX signing using BLOB method will get dropped on JDK 9: "blob signing is going away in JDK9. "
@@ -814,7 +813,7 @@ public class NativeMojo extends AbstractJfxToolsMojo {
         }
     }
 
-    private void doPrepareBeforeBundling(String currentRunningBundlerID, Map<String, ? super Object> paramsToBundleWith) {
+    protected void doPrepareBeforeBundling(String currentRunningBundlerID, Map<String, ? super Object> paramsToBundleWith) {
         // copy all files every time a bundler runs, because they might cleanup their folders,
         // but user might have extend existing bundler using same foldername (which would end up deleted/cleaned up)
         // fixes "Make it possible to have additional resources for bundlers"
@@ -931,7 +930,10 @@ public class NativeMojo extends AbstractJfxToolsMojo {
                 }
             }
         }
+        checkAndWarnAboutSlowPerformance(currentRunningBundlerID);
+    }
 
+    protected void checkAndWarnAboutSlowPerformance(String currentRunningBundlerID) {
         // check if we need to inform the user about low performance even on SSD
         // https://github.com/FibreFoX/javafx-gradle-plugin/issues/41
         if( System.getProperty("os.name").toLowerCase().startsWith("linux") && "deb".equals(currentRunningBundlerID) ){
@@ -955,7 +957,7 @@ public class NativeMojo extends AbstractJfxToolsMojo {
      * Sometimes we need to work with some bundler, even if it wasn't requested. This happens when one bundler was selected and we need
      * to work with the outcome of some image-bundler (because that JDK-bundler is faulty).
      */
-    private boolean shouldBundlerRun(String requestedBundler, String currentRunningBundlerID, Map<String, ? super Object> params) {
+    protected boolean shouldBundlerRun(String requestedBundler, String currentRunningBundlerID, Map<String, ? super Object> params) {
         if( requestedBundler != null && !"ALL".equalsIgnoreCase(requestedBundler) && !requestedBundler.equalsIgnoreCase(currentRunningBundlerID) ){
             // this is not the specified bundler
             return false;
@@ -978,7 +980,7 @@ public class NativeMojo extends AbstractJfxToolsMojo {
                     if( !skipNativeLauncherWorkaround205 ){
                         getLog().info("Detected linux application bundler ('linux.app') needs to run before installer bundlers are executed.");
                         runBundler = true;
-                        params.put(CFG_WORKAROUND_MARKER, "true");
+                        params.put(LinuxSpecificWorkarounds.CFG_WORKAROUND_MARKER, "true");
                     } else {
                         getLog().info("Skipped workaround for native linux installer bundlers.");
                     }
@@ -988,14 +990,14 @@ public class NativeMojo extends AbstractJfxToolsMojo {
         return runBundler;
     }
 
-    private void addToMapWhenNotNull(Object value, String key, Map<String, Object> map) {
+    protected void addToMapWhenNotNull(Object value, String key, Map<String, Object> map) {
         if( value == null ){
             return;
         }
         map.put(key, value);
     }
 
-    private void signJarFilesUsingBlobSigning() throws MojoFailureException, PackagerException, MojoExecutionException {
+    protected void signJarFilesUsingBlobSigning() throws MojoFailureException, PackagerException, MojoExecutionException {
         checkSigningConfiguration();
 
         SignJarParams signJarParams = new SignJarParams();
@@ -1015,7 +1017,7 @@ public class NativeMojo extends AbstractJfxToolsMojo {
         getPackagerLib().signJar(signJarParams);
     }
 
-    private void signJarFiles() throws MojoFailureException, PackagerException, MojoExecutionException {
+    protected void signJarFiles() throws MojoFailureException, PackagerException, MojoExecutionException {
         checkSigningConfiguration();
 
         AtomicReference<MojoExecutionException> exception = new AtomicReference<>();
@@ -1035,7 +1037,7 @@ public class NativeMojo extends AbstractJfxToolsMojo {
         }
     }
 
-    private void checkSigningConfiguration() throws MojoFailureException {
+    protected void checkSigningConfiguration() throws MojoFailureException {
         if( skipKeyStoreChecking ){
             getLog().info("Skipped checking if keystore exists.");
         } else {
@@ -1058,7 +1060,7 @@ public class NativeMojo extends AbstractJfxToolsMojo {
         }
     }
 
-    private void signJar(File jarFile) throws MojoExecutionException {
+    protected void signJar(File jarFile) throws MojoExecutionException {
         List<String> command = new ArrayList<>();
         command.add(getEnvironmentRelativeExecutablePath() + "jarsigner");
 
@@ -1112,7 +1114,7 @@ public class NativeMojo extends AbstractJfxToolsMojo {
         }
     }
 
-    private boolean isClassInsideJarFile(String classname, File jarFile) {
+    protected boolean isClassInsideJarFile(String classname, File jarFile) {
         String requestedJarEntryName = classname.replace(".", "/") + ".class";
         try{
             JarFile jarFileToSearchIn = new JarFile(jarFile, false, JarFile.OPEN_READ);

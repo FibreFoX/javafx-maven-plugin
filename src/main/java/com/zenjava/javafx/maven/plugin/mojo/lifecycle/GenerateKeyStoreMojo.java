@@ -82,7 +82,7 @@ public class GenerateKeyStoreMojo extends AbstractMojo {
     protected boolean skip;
 
     @FunctionalInterface
-    private interface RequiredFieldAlternativeCallback {
+    protected interface RequiredFieldAlternativeCallback {
 
         String getValue();
     }
@@ -267,17 +267,17 @@ public class GenerateKeyStoreMojo extends AbstractMojo {
         }
     }
 
-    private void checkKeystoreRequiredParameter(String value, String valueName) throws MojoExecutionException {
+    protected void checkKeystoreRequiredParameter(String value, String valueName) throws MojoExecutionException {
         if( StringUtils.isEmpty(value) ){
             throw new MojoExecutionException("The property '" + valueName + "' is required to generate a new KeyStore.");
         }
     }
 
-    private void checkAndAddRequiredField(List<String> distinguishedNameParts, String propertyName, String value, String fieldName) throws MojoExecutionException {
+    protected void checkAndAddRequiredField(List<String> distinguishedNameParts, String propertyName, String value, String fieldName) throws MojoExecutionException {
         checkAndAddRequiredField(distinguishedNameParts, propertyName, value, fieldName, null);
     }
 
-    private void checkAndAddRequiredField(List<String> distinguishedNameParts, String propertyName, String value, String fieldName, RequiredFieldAlternativeCallback alternative) throws MojoExecutionException {
+    protected void checkAndAddRequiredField(List<String> distinguishedNameParts, String propertyName, String value, String fieldName, RequiredFieldAlternativeCallback alternative) throws MojoExecutionException {
         if( !StringUtils.isEmpty(value) ){
             distinguishedNameParts.add(fieldName + "=" + value);
         } else {

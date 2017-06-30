@@ -56,7 +56,7 @@ public abstract class AbstractJfxToolsMojo extends AbstractMojo {
      *
      * @component
      */
-    private MavenProjectHelper projectHelper;
+    protected MavenProjectHelper projectHelper;
 
     /**
      * Flag to turn on verbose logging. Set this to true if you are having problems and want more detailed information.
@@ -142,7 +142,7 @@ public abstract class AbstractJfxToolsMojo extends AbstractMojo {
      */
     protected String libFolderName;
 
-    private PackagerLib packagerLib;
+    protected PackagerLib packagerLib;
 
     public PackagerLib getPackagerLib() throws MojoExecutionException {
         // lazy-initialization of packagerLib

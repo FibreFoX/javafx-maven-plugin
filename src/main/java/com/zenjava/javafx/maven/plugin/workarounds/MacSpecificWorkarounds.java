@@ -29,15 +29,13 @@ import org.apache.maven.plugin.logging.Log;
  */
 public class MacSpecificWorkarounds {
 
-    private Log logger;
-    private File nativeOutputDir;
+    protected Log logger;
 
     public MacSpecificWorkarounds(File nativeOutputDir, Log logger) {
         this.logger = logger;
-        this.nativeOutputDir = nativeOutputDir;
     }
 
-    public Log getLog() {
+    protected Log getLog() {
         return logger;
     }
 

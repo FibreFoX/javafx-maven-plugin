@@ -15,7 +15,6 @@
  */
 package com.zenjava.javafx.maven.plugin.utils;
 
-import com.zenjava.javafx.maven.plugin.utils.JavaDetectionTools;
 import com.oracle.tools.packager.BundlerParamInfo;
 import com.oracle.tools.packager.IOUtils;
 import com.oracle.tools.packager.Log;

@@ -15,27 +15,7 @@
  */
 package com.zenjava.javafx.maven.plugin.utils;
 
-import com.oracle.tools.packager.Bundler;
-import com.oracle.tools.packager.IOUtils;
-import com.oracle.tools.packager.RelativeFileSet;
-import com.oracle.tools.packager.StandardBundlerParam;
-import com.zenjava.javafx.maven.plugin.NativeLauncher;
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
 import org.apache.maven.plugin.logging.Log;
 
 /**
@@ -44,20 +24,14 @@ import org.apache.maven.plugin.logging.Log;
  */
 public class Workarounds {
 
-    private Log logger;
-    private File nativeOutputDir;
+    protected Log logger;
 
     public Workarounds(File nativeOutputDir, Log logger) {
         this.logger = logger;
-        this.nativeOutputDir = nativeOutputDir;
     }
 
-    public Log getLog() {
+    protected Log getLog() {
         return logger;
-    }
-
-    public boolean isWorkaroundForBug185Needed(Map<String, Object> params) {
-        return params.containsKey("jnlp.allPermisions") && Boolean.parseBoolean(String.valueOf(params.get("jnlp.allPermisions")));
     }
 
     public boolean isWorkaroundForBug205Needed() {

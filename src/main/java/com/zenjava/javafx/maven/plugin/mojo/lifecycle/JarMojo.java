@@ -362,7 +362,7 @@ public class JarMojo extends AbstractJfxToolsMojo {
         }
     }
 
-    private boolean checkIfJavaIsHavingPackagerJar() {
+    protected boolean checkIfJavaIsHavingPackagerJar() {
         if( JavaDetectionTools.IS_JAVA_8 && JavaDetectionTools.isAtLeastOracleJavaUpdateVersion(40) ){
             return true;
         }
@@ -372,7 +372,7 @@ public class JarMojo extends AbstractJfxToolsMojo {
         return false;
     }
 
-    private boolean isListedInExclusionList(Artifact artifact) {
+    protected boolean isListedInExclusionList(Artifact artifact) {
         return classpathExcludes.stream().filter(dependency -> {
             // we are checking for "groupID:artifactId:" because we don't care about versions nor types (jar, war, source, ...)
             String dependencyTrailIdentifier = dependency.getGroupId() + ":" + dependency.getArtifactId() + ":";

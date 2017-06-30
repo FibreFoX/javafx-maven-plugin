@@ -40,17 +40,20 @@ import org.apache.maven.plugin.logging.Log;
  */
 public class LinuxSpecificWorkarounds {
 
-    private static final String CONFIG_FILE_EXTENSION = ".cfg";
+    public static final String CONFIG_FILE_EXTENSION = ".cfg";
 
-    private Log logger;
-    private File nativeOutputDir;
+    public static final String CFG_WORKAROUND_MARKER = "cfgWorkaroundMarker";
+    public static final String CFG_WORKAROUND_DONE_MARKER = CFG_WORKAROUND_MARKER + ".done";
+
+    protected Log logger;
+    protected File nativeOutputDir;
 
     public LinuxSpecificWorkarounds(File nativeOutputDir, Log logger) {
         this.logger = logger;
         this.nativeOutputDir = nativeOutputDir;
     }
 
-    public Log getLog() {
+    protected Log getLog() {
         return logger;
     }
 
