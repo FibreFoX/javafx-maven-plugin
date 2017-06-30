@@ -34,6 +34,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import org.apache.maven.project.MavenProjectHelper;
 
 /**
  * Base Mojo that any other Mojo wanting to access the JavaFX Packager tools should extend from. This provides
@@ -49,6 +50,13 @@ public abstract class AbstractJfxToolsMojo extends AbstractMojo {
      * @readonly
      */
     protected MavenProject project;
+
+    /**
+     * Used for attaching the source jar to the project.
+     *
+     * @component
+     */
+    private MavenProjectHelper projectHelper;
 
     /**
      * Flag to turn on verbose logging. Set this to true if you are having problems and want more detailed information.

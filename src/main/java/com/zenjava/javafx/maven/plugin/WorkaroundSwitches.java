@@ -21,4 +21,11 @@ package com.zenjava.javafx.maven.plugin;
  */
 public class WorkaroundSwitches {
 
+    protected boolean skipNativeLauncherWorkaround124;
+    protected boolean skipNativeLauncherWorkaround167;
+    protected boolean skipJNLPRessourcePathWorkaround182;
+    protected boolean skipSigningJarFilesJNLP185;
+    protected boolean skipSizeRecalculationForJNLP185;
+    protected boolean skipNativeLauncherWorkaround205;
+    protected boolean skipMacBundlerWorkaround = false;
 }

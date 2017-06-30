@@ -21,4 +21,12 @@ package com.zenjava.javafx.maven.plugin;
  */
 public class FeatureSwitches {
 
+    protected boolean useEnvironmentRelativeExecutables;
+    protected boolean noBlobSigning;
+    protected boolean failOnError = false;
+    protected boolean onlyCustomBundlers = false;
+    protected boolean skipNativeVersionNumberSanitizing = false;
+    protected boolean skipMainClassScanning = false;
+    protected boolean skipKeyStoreChecking = false;
+    protected boolean skipKeypassWhileSigning = false;
 }
