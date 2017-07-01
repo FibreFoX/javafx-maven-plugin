@@ -15,6 +15,7 @@
  */
 package com.zenjava.javafx.maven.plugin.workarounds;
 
+import com.zenjava.javafx.maven.plugin.utils.FileHelper;
 import com.zenjava.javafx.maven.plugin.utils.JavaDetectionTools;
 import java.io.File;
 import java.io.IOException;
@@ -22,7 +23,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -37,6 +37,7 @@ import org.apache.maven.plugin.logging.Log;
 public class GenericWorkarounds {
 
     protected static final String JNLP_JAR_PATTERN = "(.*)href=(\".*?\")(.*)size=(\".*?\")(.*)";
+    protected FileHelper fileHelper = new FileHelper();
 
     protected Log logger;
     protected File nativeOutputDir;
@@ -105,20 +106,10 @@ public class GenericWorkarounds {
         });
     }
 
-    protected Map<String, Long> getFileSizes(List<String> files) {
-        final Map<String, Long> fileSizes = new HashMap<>();
-        files.stream().forEach(relativeFilePath -> {
-            File file = new File(nativeOutputDir, relativeFilePath);
-            // add the size for each file
-            fileSizes.put(relativeFilePath, file.length());
-        });
-        return fileSizes;
-    }
-
     public void fixFileSizesWithinGeneratedJNLPFiles() {
         // after signing, we have to adjust sizes, because they have changed (since they are modified with the signature)
         List<String> jarFiles = getJARFilesFromJNLPFiles();
-        Map<String, Long> newFileSizes = getFileSizes(jarFiles);
+        Map<String, Long> newFileSizes = fileHelper.getFileSizes(nativeOutputDir, jarFiles);
         List<File> generatedJNLPFiles = getGeneratedJNLPFiles();
         Pattern pattern = Pattern.compile(JNLP_JAR_PATTERN);
         generatedJNLPFiles.forEach(file -> {

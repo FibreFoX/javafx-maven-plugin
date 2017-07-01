@@ -13,29 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.zenjava.javafx.maven.plugin.utils;
-
-import java.io.File;
-import org.apache.maven.plugin.logging.Log;
+package com.zenjava.javafx.maven.plugin.mojo.lifecycle.experimental;
 
 /**
+ * EXPERIMENTAL
  *
- * @author Danny Althoff
+ * @goal build-native-app
  */
-public class Workarounds {
-
-    protected Log logger;
-
-    public Workarounds(File nativeOutputDir, Log logger) {
-        this.logger = logger;
-    }
-
-    protected Log getLog() {
-        return logger;
-    }
-
-    public boolean isWorkaroundForBug205Needed() {
-        return (JavaDetectionTools.IS_JAVA_8 && JavaDetectionTools.isAtLeastOracleJavaUpdateVersion(40)) || JavaDetectionTools.IS_JAVA_9;
-    }
+public class NativeAppMojo {
 
 }

@@ -19,6 +19,7 @@ import com.zenjava.javafx.maven.plugin.utils.JavaDetectionTools;
 import com.sun.javafx.tools.packager.CreateJarParams;
 import com.sun.javafx.tools.packager.PackagerException;
 import com.zenjava.javafx.maven.plugin.AbstractJfxToolsMojo;
+import com.zenjava.javafx.maven.plugin.utils.FileHelper;
 
 import org.apache.maven.model.Build;
 import org.apache.maven.model.Dependency;
@@ -37,6 +38,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.maven.artifact.Artifact;
 
 /**
@@ -174,6 +177,13 @@ public class JarMojo extends AbstractJfxToolsMojo {
      * @parameter property="jfx.fixedManifestClasspath" default-value=""
      */
     protected String fixedManifestClasspath = null;
+
+    /**
+     * @since 8.9.0
+     *
+     * @parameter property="jfx.attachAsZippedArtifact" default-value="false"
+     */
+    protected boolean attachAsZippedArtifact = false;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -329,6 +339,7 @@ public class JarMojo extends AbstractJfxToolsMojo {
         });
 
         // https://docs.oracle.com/javase/8/docs/technotes/guides/deploy/manifest.html#JSDPG896
+        // http://docs.oracle.com/javase/8/docs/technotes/guides/javaws/developersguide/syntax.html#security
         if( allPermissions ){
             manifestAttributes.put("Permissions", "all-permissions");
         }
@@ -348,7 +359,7 @@ public class JarMojo extends AbstractJfxToolsMojo {
                         try{
                             Path targetFolder = jfxAppOutputDir.toPath();
                             Path sourceFolder = appResources.toPath();
-                            copyRecursive(sourceFolder, targetFolder);
+                            fileHelper.copyRecursive(sourceFolder, targetFolder, getLog());
                         } catch(IOException e){
                             getLog().warn("Couldn't copy additional application resource-file(s).", e);
                         }
@@ -359,6 +370,19 @@ public class JarMojo extends AbstractJfxToolsMojo {
         if( libDir.list().length == 0 ){
             // remove lib-folder, when nothing ended up there
             libDir.delete();
+        }
+
+        if( attachAsZippedArtifact ){
+            // create ZIPPED version first
+            File zipFileTarget = new File(build.getDirectory() + File.separator + build.getFinalName() + "-jfx-app.zip");
+            try{
+                new FileHelper().pack(jfxAppOutputDir.toPath(), zipFileTarget.toPath());
+                // attach to project artifacts
+                projectHelper.attachArtifact(project, "zip", "jfx-app", zipFileTarget);
+            } catch(IOException ex){
+                // TODO handle
+                Logger.getLogger(JarMojo.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
 

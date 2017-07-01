@@ -195,4 +195,7 @@ public class LinuxSpecificWorkarounds {
         params.put(StandardBundlerParam.APP_RESOURCES.getID() + "List", appResourcesList);
     }
 
+    public boolean isWorkaroundForBug205Needed() {
+        return (JavaDetectionTools.IS_JAVA_8 && JavaDetectionTools.isAtLeastOracleJavaUpdateVersion(40)) || JavaDetectionTools.IS_JAVA_9;
+    }
 }

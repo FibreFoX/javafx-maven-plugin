@@ -15,7 +15,6 @@
  */
 package com.zenjava.javafx.maven.plugin.mojo.lifecycle;
 
-import com.zenjava.javafx.maven.plugin.utils.Workarounds;
 import com.oracle.tools.packager.AbstractBundler;
 import com.oracle.tools.packager.Bundler;
 import com.oracle.tools.packager.Bundlers;
@@ -462,7 +461,6 @@ public class NativeMojo extends AbstractJfxToolsMojo {
      */
     protected boolean skipKeypassWhileSigning = false;
 
-    protected Workarounds workarounds = null;
     protected WindowsSpecificWorkarounds windowsSpecificWorkarounds = null;
     protected LinuxSpecificWorkarounds linuxSpecificWorkarounds = null;
     protected MacSpecificWorkarounds macSpecificWorkarounds = null;
@@ -482,7 +480,6 @@ public class NativeMojo extends AbstractJfxToolsMojo {
 
         getLog().info("Building Native Installers");
 
-        workarounds = new Workarounds(nativeOutputDir, getLog());
         windowsSpecificWorkarounds = new WindowsSpecificWorkarounds(nativeOutputDir, getLog());
         linuxSpecificWorkarounds = new LinuxSpecificWorkarounds(nativeOutputDir, getLog());
         macSpecificWorkarounds = new MacSpecificWorkarounds(nativeOutputDir, getLog());
@@ -528,7 +525,7 @@ public class NativeMojo extends AbstractJfxToolsMojo {
                 try{
                     Path targetFolder = jfxAppOutputDir.toPath();
                     Path sourceFolder = appResources.toPath();
-                    copyRecursive(sourceFolder, targetFolder);
+                    fileHelper.copyRecursive(sourceFolder, targetFolder, getLog());
                 } catch(IOException e){
                     getLog().warn(e);
                 }
@@ -923,7 +920,7 @@ public class NativeMojo extends AbstractJfxToolsMojo {
                         if( verbose ){
                             getLog().info("Copying additional bundler resources into: " + targetFolder.toFile().getAbsolutePath());
                         }
-                        copyRecursive(sourceFolder, targetFolder);
+                        fileHelper.copyRecursive(sourceFolder, targetFolder, getLog());
                     } catch(IOException e){
                         getLog().warn("Couldn't copy additional bundler resource-file(s).", e);
                     }
@@ -974,7 +971,7 @@ public class NativeMojo extends AbstractJfxToolsMojo {
         // https://github.com/javafx-maven-plugin/javafx-maven-plugin/issues/205
         // do run application bundler and put the cfg-file to application resources
         if( System.getProperty("os.name").toLowerCase().startsWith("linux") ){
-            if( workarounds.isWorkaroundForBug205Needed() ){
+            if( linuxSpecificWorkarounds.isWorkaroundForBug205Needed() ){
                 // check if special conditions for this are met (not jnlp, but not linux.app too, because another workaround already works)
                 if( !"jnlp".equalsIgnoreCase(requestedBundler) && !"linux.app".equalsIgnoreCase(requestedBundler) && "linux.app".equalsIgnoreCase(currentRunningBundlerID) ){
                     if( !skipNativeLauncherWorkaround205 ){
