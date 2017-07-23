@@ -109,18 +109,6 @@ public abstract class AbstractJfxToolsMojo extends AbstractMojo {
     protected String deployDir;
 
     /**
-     * All commands executed by this Maven-plugin will be done using the current available commands
-     * of your maven-execution environment. It is possible to call Maven with a different version of Java,
-     * so these calls might be wrong. To use the executables of the JDK used for running this maven-plugin,
-     * please set this to false. You might need this in the case you installed multiple versions of Java.
-     *
-     * The default is to use environment relative executables.
-     *
-     * @parameter property="jfx.useEnvironmentRelativeExecutables" default-value="true"
-     */
-    protected boolean useEnvironmentRelativeExecutables;
-
-    /**
      * Set this to true for skipping the execution.
      *
      * @parameter property="jfx.skip" default-value="false"
@@ -161,16 +149,5 @@ public abstract class AbstractJfxToolsMojo extends AbstractMojo {
             this.packagerLib = new PackagerLib();
         }
         return this.packagerLib;
-    }
-
-    protected String getEnvironmentRelativeExecutablePath() {
-        if( useEnvironmentRelativeExecutables ){
-            return "";
-        }
-
-        String jrePath = System.getProperty("java.home");
-        String jdkPath = jrePath + File.separator + ".." + File.separator + "bin" + File.separator;
-
-        return jdkPath;
     }
 }

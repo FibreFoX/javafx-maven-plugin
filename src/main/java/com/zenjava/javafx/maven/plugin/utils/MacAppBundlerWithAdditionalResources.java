@@ -125,11 +125,11 @@ public class MacAppBundlerWithAdditionalResources extends MacAppBundler {
             File executableFile = new File(macOSDirectory, getLauncherName(p));
             IOUtils.copyFromURL(RAW_EXECUTABLE_URL.fetchFrom(p), executableFile);
 
-            if( JavaDetectionTools.IS_JAVA_8 && JavaDetectionTools.isAtLeastOracleJavaUpdateVersion(40) ){
+            if( JavaTools.IS_JAVA_8 && JavaTools.isAtLeastOracleJavaUpdateVersion(40) ){
                 // use FQN for not having incompatible import
                 IOUtils.copyFromURL(com.oracle.tools.packager.mac.MacResources.class.getResource(LIBRARY_NAME), new File(macOSDirectory, LIBRARY_NAME));
 
-                if( JavaDetectionTools.isAtLeastOracleJavaUpdateVersion(60) ){
+                if( JavaTools.isAtLeastOracleJavaUpdateVersion(60) ){
                     if( !MAC_CONFIGURE_LAUNCHER_IN_PLIST.fetchFrom(p) ){
                         if( LAUNCHER_CFG_FORMAT.fetchFrom(p).equals(CFG_FORMAT_PROPERTIES) ){
                             writeCfgFile(p, rootDirectory);
@@ -146,7 +146,7 @@ public class MacAppBundlerWithAdditionalResources extends MacAppBundler {
             copyClassPathEntries(javaDirectory, p);
             IOUtils.copyFile(getConfig_Icon(p), new File(resourcesDirectory, getConfig_Icon(p).getName()));
 
-            if( JavaDetectionTools.IS_JAVA_8 && JavaDetectionTools.isAtLeastOracleJavaUpdateVersion(60) ){
+            if( JavaTools.IS_JAVA_8 && JavaTools.isAtLeastOracleJavaUpdateVersion(60) ){
                 for( Map<String, ? super Object> fa : com.oracle.tools.packager.StandardBundlerParam.FILE_ASSOCIATIONS.fetchFrom(p) ){
                     File f = com.oracle.tools.packager.StandardBundlerParam.FA_ICON.fetchFrom(fa);
                     if( f != null && f.exists() ){
@@ -157,7 +157,7 @@ public class MacAppBundlerWithAdditionalResources extends MacAppBundler {
 
             IOUtils.copyFile(getConfig_InfoPlist(p), new File(contentsDirectory, "Info.plist"));
 
-            if( JavaDetectionTools.IS_JAVA_8 && JavaDetectionTools.isAtLeastOracleJavaUpdateVersion(60) ){
+            if( JavaTools.IS_JAVA_8 && JavaTools.isAtLeastOracleJavaUpdateVersion(60) ){
                 for( Map<String, ? super Object> entryPoint : StandardBundlerParam.SECONDARY_LAUNCHERS.fetchFrom(p) ){
                     Map<String, ? super Object> tmp = new HashMap<>(originalParams);
                     tmp.putAll(entryPoint);
@@ -212,7 +212,7 @@ public class MacAppBundlerWithAdditionalResources extends MacAppBundler {
 
             String signingIdentity = DEVELOPER_ID_APP_SIGNING_KEY.fetchFrom(p);
             if( signingIdentity != null ){
-                if( JavaDetectionTools.IS_JAVA_8 && JavaDetectionTools.isAtLeastOracleJavaUpdateVersion(40) ){
+                if( JavaTools.IS_JAVA_8 && JavaTools.isAtLeastOracleJavaUpdateVersion(40) ){
                     // update 40 seems to have made this optional ;)
                     // use FQN for not having incompatible import
                     if( Optional.ofNullable(com.oracle.tools.packager.StandardBundlerParam.SIGN_BUNDLE.fetchFrom(p)).orElse(Boolean.TRUE) ){

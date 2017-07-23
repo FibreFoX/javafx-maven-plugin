@@ -16,7 +16,7 @@
 package com.zenjava.javafx.maven.plugin.workarounds;
 
 import com.zenjava.javafx.maven.plugin.utils.FileHelper;
-import com.zenjava.javafx.maven.plugin.utils.JavaDetectionTools;
+import com.zenjava.javafx.maven.plugin.utils.JavaTools;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -54,7 +54,7 @@ public class GenericWorkarounds {
     public boolean isWorkaroundForBug167Needed() {
         // this has been fixed and made available since 1.8.0u92:
         // http://www.oracle.com/technetwork/java/javase/2col/8u92-bugfixes-2949473.html
-        return JavaDetectionTools.IS_JAVA_8 && JavaDetectionTools.isAtLeastOracleJavaUpdateVersion(60) && !JavaDetectionTools.isAtLeastOracleJavaUpdateVersion(92);
+        return JavaTools.IS_JAVA_8 && JavaTools.isAtLeastOracleJavaUpdateVersion(60) && !JavaTools.isAtLeastOracleJavaUpdateVersion(92);
     }
 
     public boolean isWorkaroundForBug185Needed(Map<String, Object> params) {

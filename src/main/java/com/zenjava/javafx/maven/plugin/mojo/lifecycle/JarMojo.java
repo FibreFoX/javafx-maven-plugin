@@ -15,7 +15,7 @@
  */
 package com.zenjava.javafx.maven.plugin.mojo.lifecycle;
 
-import com.zenjava.javafx.maven.plugin.utils.JavaDetectionTools;
+import com.zenjava.javafx.maven.plugin.utils.JavaTools;
 import com.sun.javafx.tools.packager.CreateJarParams;
 import com.sun.javafx.tools.packager.PackagerException;
 import com.zenjava.javafx.maven.plugin.AbstractJfxToolsMojo;
@@ -387,10 +387,10 @@ public class JarMojo extends AbstractJfxToolsMojo {
     }
 
     protected boolean checkIfJavaIsHavingPackagerJar() {
-        if( JavaDetectionTools.IS_JAVA_8 && JavaDetectionTools.isAtLeastOracleJavaUpdateVersion(40) ){
+        if( JavaTools.IS_JAVA_8 && JavaTools.isAtLeastOracleJavaUpdateVersion(40) ){
             return true;
         }
-        if( JavaDetectionTools.IS_JAVA_9 ){ // NOSONAR
+        if( JavaTools.IS_JAVA_9 ){ // NOSONAR
             return true;
         }
         return false;

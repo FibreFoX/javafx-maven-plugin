@@ -21,7 +21,17 @@ package com.zenjava.javafx.maven.plugin;
  */
 public class FeatureSwitches {
 
-    protected boolean useEnvironmentRelativeExecutables;
+    /**
+     * All commands executed by this Maven-plugin will be done using the current available commands
+     * of your maven-execution environment. It is possible to call Maven with a different version of Java,
+     * so these calls might be wrong. To use the executables of the JDK used for running this maven-plugin,
+     * please set this to false. You might need this in the case you installed multiple versions of Java.
+     *
+     * The default is to use environment relative executables.
+     *
+     * @parameter property="jfx.feature.useEnvironmentRelativeExecutables" default-value="true"
+     */
+    protected boolean useEnvironmentRelativeExecutables = true;
     protected boolean noBlobSigning;
     protected boolean failOnError = false;
     protected boolean onlyCustomBundlers = false;

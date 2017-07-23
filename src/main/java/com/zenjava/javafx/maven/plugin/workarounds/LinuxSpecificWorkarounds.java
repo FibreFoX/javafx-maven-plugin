@@ -19,7 +19,7 @@ import com.oracle.tools.packager.IOUtils;
 import com.oracle.tools.packager.RelativeFileSet;
 import com.oracle.tools.packager.StandardBundlerParam;
 import com.zenjava.javafx.maven.plugin.NativeLauncher;
-import com.zenjava.javafx.maven.plugin.utils.JavaDetectionTools;
+import com.zenjava.javafx.maven.plugin.utils.JavaTools;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -58,7 +58,7 @@ public class LinuxSpecificWorkarounds {
     }
 
     public boolean isWorkaroundForCfgFileNameNeeded() {
-        return JavaDetectionTools.IS_JAVA_8 && JavaDetectionTools.isAtLeastOracleJavaUpdateVersion(40) || JavaDetectionTools.IS_JAVA_9;
+        return JavaTools.IS_JAVA_8 && JavaTools.isAtLeastOracleJavaUpdateVersion(40) || JavaTools.IS_JAVA_9;
     }
 
     public void applyWorkaroundForCfgFileName(String appName, List<NativeLauncher> secondaryLaunchers) {
@@ -149,7 +149,7 @@ public class LinuxSpecificWorkarounds {
         appResourcesList.add(new RelativeFileSet(appPath.toFile(), filenameFixedConfigFiles));
 
         // special workaround when having some jdk before update 60
-        if( JavaDetectionTools.IS_JAVA_8 && !JavaDetectionTools.isAtLeastOracleJavaUpdateVersion(60) ){
+        if( JavaTools.IS_JAVA_8 && !JavaTools.isAtLeastOracleJavaUpdateVersion(60) ){
             try{
                 // pre-update60 did not contain any list of RelativeFileSets, which requires to rework APP_RESOURCES :/
                 Path tempResourcesDirectory = Files.createTempDirectory("jfxmp-workaround205-").toAbsolutePath();
@@ -196,6 +196,6 @@ public class LinuxSpecificWorkarounds {
     }
 
     public boolean isWorkaroundForBug205Needed() {
-        return (JavaDetectionTools.IS_JAVA_8 && JavaDetectionTools.isAtLeastOracleJavaUpdateVersion(40)) || JavaDetectionTools.IS_JAVA_9;
+        return (JavaTools.IS_JAVA_8 && JavaTools.isAtLeastOracleJavaUpdateVersion(40)) || JavaTools.IS_JAVA_9;
     }
 }

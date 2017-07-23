@@ -15,10 +15,12 @@
  */
 package com.zenjava.javafx.maven.plugin.utils;
 
+import java.io.File;
+
 /**
  * @author Danny Althoff
  */
-public class JavaDetectionTools {
+public class JavaTools {
 
     public static final boolean IS_JAVA_8 = isJavaVersion(8);
     public static final boolean IS_JAVA_9 = !IS_JAVA_8 && isJavaVersion(9) || isJavaVersion(9, true);
@@ -45,5 +47,17 @@ public class JavaDetectionTools {
         // issue #159 NumberFormatException on openjdk (the reported Java version is "1.8.0_45-internal")
         String javaUpdateVersion = javaUpdateVersionRaw.replaceAll("[^\\d]", "");
         return Integer.parseInt(javaUpdateVersion, 10) >= updateNumber;
+    }
+
+    public static String getExecutablePath(boolean useEnvironmentRelativeExecutables) {
+        if( useEnvironmentRelativeExecutables ){
+            return "";
+        }
+
+        String jrePath = System.getProperty("java.home");
+        if( IS_JAVA_9 ){
+            return jrePath + File.separator + "bin" + File.separator;
+        }
+        return jrePath + File.separator + ".." + File.separator + "bin" + File.separator;
     }
 }
