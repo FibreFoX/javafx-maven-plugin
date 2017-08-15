@@ -16,6 +16,7 @@
 package com.zenjava.javafx.maven.plugin.settings;
 
 import java.io.File;
+import org.apache.maven.plugins.annotations.Parameter;
 
 /**
  *
@@ -24,11 +25,17 @@ import java.io.File;
 public class BaseSettings {
 
     /**
-     * Flag to turn on verbose logging. Set this to true if you are having problems and want more detailed information.
-     *
-     * @parameter property="jfx.verbose" default-value="false"
+     * Set this to true for skipping the execution.
      */
-    protected Boolean verbose;
+    @Parameter(name = "skip", property = "jfx.baseSettings.skip", defaultValue = "false")
+    protected boolean skip = false;
+
+    /**
+     * Flag to turn off verbose logging. Set this to true if you are having problems and want more detailed information.
+     *
+     */
+    @Parameter(name = "verbose", property = "jfx.baseSettings.verbose", defaultValue = "true")
+    protected boolean verbose = true;
 
     /**
      * The 'app' output directory. This is where the base executable JavaFX jar is built into, along with any dependent
@@ -38,9 +45,9 @@ public class BaseSettings {
      * <p>
      * This defaults to 'target/jfx/app' and in most cases there is no real need to change this.
      *
-     * @parameter property="jfx.jfxAppOutputDir" default-value="${project.build.directory}/jfx/app"
      */
-    protected File jfxAppOutputDir;
+    @Parameter(name = "outputDirectory", alias = "jfxAppOutputDir", property = "jfx.baseSettings.outputDirectory", defaultValue = "${project.build.directory}/jfx")
+    protected File outputDirectory;
 
     /**
      * The directory contain deployment specific files, such as icons and splash screen images. This directory is added
@@ -56,16 +63,58 @@ public class BaseSettings {
      * <ul>
      * <li>for <b>windows</b> put an icon at src/main/deploy/package/windows/your-app-name.ico</li>
      * <li>for <b>mac</b> put an icon at src/main/deploy/package/macosx/your-app-name.icns</li>
+     * <li>for <b>linux</b> put an icon at src/main/deploy/package/linux/your-app-name.png</li>
      * </ul>
-     *
-     * @parameter property="jfx.deployDir" default-value="${project.basedir}/src/main/deploy"
      */
+    @Parameter(name = "deployDir", property = "jfx.baseSettings.deployDir", defaultValue = "${project.basedir}/src/main/deploy")
     protected String deployDir;
 
     /**
-     * Set this to true for skipping the execution.
+     * Per default his plugin does not break the build if any bundler is failing. If you want
+     * to fail the build and not just print a warning, please set this to true.
      *
-     * @parameter property="jfx.skip" default-value="false"
      */
-    protected boolean skip;
+    @Parameter(property = "jfx.baseSettings.failOnError", defaultValue = "false")
+    protected boolean failOnError = false;
+
+    public boolean isSkip() {
+        return skip;
+    }
+
+    public void setSkip(boolean skip) {
+        this.skip = skip;
+    }
+
+    public Boolean isVerbose() {
+        return verbose;
+    }
+
+    public void setVerbose(Boolean verbose) {
+        this.verbose = verbose;
+    }
+
+    public File getOutputDirectory() {
+        return outputDirectory;
+    }
+
+    public void setOutputDirectory(File outputDirectory) {
+        this.outputDirectory = outputDirectory;
+    }
+
+    public String getDeployDir() {
+        return deployDir;
+    }
+
+    public void setDeployDir(String deployDir) {
+        this.deployDir = deployDir;
+    }
+
+    public boolean isFailOnError() {
+        return failOnError;
+    }
+
+    public void setFailOnError(boolean failOnError) {
+        this.failOnError = failOnError;
+    }
+
 }

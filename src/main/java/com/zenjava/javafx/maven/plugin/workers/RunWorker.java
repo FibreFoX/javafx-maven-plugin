@@ -15,8 +15,11 @@
  */
 package com.zenjava.javafx.maven.plugin.workers;
 
+import com.zenjava.javafx.maven.plugin.settings.BaseSettings;
+import com.zenjava.javafx.maven.plugin.settings.JfxJarSettings;
 import com.zenjava.javafx.maven.plugin.settings.RunSettings;
 import com.zenjava.javafx.maven.plugin.utils.JavaTools;
+import com.zenjava.javafx.maven.plugin.utils.LoggerCall;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,8 +32,8 @@ import org.apache.maven.plugin.MojoExecutionException;
  */
 public class RunWorker {
 
-    public void execute(RunSettings runSettings) throws MojoExecutionException {
-        getLog().info("Running JavaFX Application");
+    public void execute(BaseSettings baseSettings, JfxJarSettings jfxJarSettings, RunSettings runSettings, LoggerCall infoLogger) throws MojoExecutionException {
+        infoLogger.log("Running JavaFX Application");
 
         List<String> command = new ArrayList<>();
         command.add(JavaTools.getExecutablePath(runSettings.isUseEnvironmentRelativeExecutables()) + "java");
@@ -43,7 +46,7 @@ public class RunWorker {
         });
 
         command.add("-jar");
-        command.add(jfxMainAppJarName);
+        command.add(jfxJarSettings.getJfxMainAppJarName());
 
         // it is possible to have jfx:run pass additional parameters
         // fixes https://github.com/javafx-maven-plugin/javafx-maven-plugin/issues/176
@@ -56,11 +59,11 @@ public class RunWorker {
         try{
             ProcessBuilder pb = new ProcessBuilder()
                     .inheritIO()
-                    .directory(jfxAppOutputDir)
+                    .directory(jfxJarSettings.getOutputFolderName())
                     .command(command);
 
-            if( verbose ){
-                getLog().info("Running command: " + String.join(" ", command));
+            if( baseSettings.isVerbose() ){
+                infoLogger.log("Running command: " + String.join(" ", command));
             }
 
             Process p = pb.start();

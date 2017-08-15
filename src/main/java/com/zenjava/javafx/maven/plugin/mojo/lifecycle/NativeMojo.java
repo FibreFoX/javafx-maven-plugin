@@ -19,6 +19,7 @@ import com.oracle.tools.packager.AbstractBundler;
 import com.oracle.tools.packager.Bundler;
 import com.oracle.tools.packager.Bundlers;
 import com.oracle.tools.packager.ConfigException;
+import com.oracle.tools.packager.Log;
 import com.oracle.tools.packager.RelativeFileSet;
 import com.oracle.tools.packager.StandardBundlerParam;
 import com.oracle.tools.packager.UnsupportedPlatformException;
@@ -27,10 +28,15 @@ import com.oracle.tools.packager.linux.LinuxRpmBundler;
 import com.oracle.tools.packager.windows.WinExeBundler;
 import com.oracle.tools.packager.windows.WinMsiBundler;
 import com.sun.javafx.tools.packager.PackagerException;
+import com.sun.javafx.tools.packager.PackagerLib;
 import com.sun.javafx.tools.packager.SignJarParams;
-import com.zenjava.javafx.maven.plugin.AbstractJfxToolsMojo;
-import com.zenjava.javafx.maven.plugin.FileAssociation;
-import com.zenjava.javafx.maven.plugin.NativeLauncher;
+import com.zenjava.javafx.maven.plugin.AbstractJfxMojo;
+import com.zenjava.javafx.maven.plugin.settings.JfxJarSettings;
+import com.zenjava.javafx.maven.plugin.settings.NativeAppSettings;
+import com.zenjava.javafx.maven.plugin.settings.dto.FileAssociation;
+import com.zenjava.javafx.maven.plugin.settings.dto.NativeLauncher;
+import com.zenjava.javafx.maven.plugin.utils.FileHelper;
+import com.zenjava.javafx.maven.plugin.utils.JavaTools;
 import com.zenjava.javafx.maven.plugin.workarounds.GenericWorkarounds;
 import com.zenjava.javafx.maven.plugin.workarounds.LinuxSpecificWorkarounds;
 import com.zenjava.javafx.maven.plugin.workarounds.MacSpecificWorkarounds;
@@ -54,28 +60,31 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 
-/**
- * @goal build-native
- */
-public class NativeMojo extends AbstractJfxToolsMojo {
+@Mojo(name = "build-native")
+public class NativeMojo extends AbstractJfxMojo {
+
+    @Parameter
+    protected JfxJarSettings jfxJarSettings;
+
+    @Parameter
+    protected NativeAppSettings nativeAppSettings;
 
     /**
      * Used as the 'id' of the application, and is used as the CFBundleDisplayName on Mac. See the official JavaFX
      * Packaging tools documentation for other information on this. Will be used as GUID on some installers too.
-     *
-     * @parameter
      */
+    @Parameter
     protected String identifier;
 
     /**
      * The vendor of the application (i.e. you). This is required for some of the installation bundles and it's
      * recommended just to set it from the get-go to avoid problems. This will default to the project.organization.name
      * element in you POM if you have one.
-     *
-     * @parameter property="project.organization.name"
-     * @required
      */
+    @Parameter(required = true, property = "project.organization.name")
     protected String vendor;
 
     /**
@@ -85,9 +94,8 @@ public class NativeMojo extends AbstractJfxToolsMojo {
      * sub-directories until you find what you are looking for.
      * <p>
      * This defaults to 'target/jfx/native' and the interesting files are usually under 'bundles'.
-     *
-     * @parameter property="jfx.nativeOutputDir" default-value="${project.build.directory}/jfx/native"
      */
+    @Parameter(property = "jfx.nativeOutputDir", defaultValue = "${project.build.directory}/jfx/native")
     protected File nativeOutputDir;
 
     /**
@@ -111,17 +119,15 @@ public class NativeMojo extends AbstractJfxToolsMojo {
      *
      * <p>
      * For a full list of available bundlers on your system, call 'mvn jfx:list-bundlers' inside your project.
-     *
-     * @parameter property="jfx.bundler" default-value="ALL"
      */
+    @Parameter(property = "jfx.bundler", defaultValue = "ALL")
     protected String bundler;
 
     /**
      * Properties passed to the Java Virtual Machine when the application is started (i.e. these properties are system
      * properties of the JVM bundled in the native distribution and used to run the application once installed).
-     *
-     * @parameter property="jfx.jvmProperties"
      */
+    @Parameter(property = "jfx.jvmProperties")
     protected Map<String, String> jvmProperties;
 
     /**
@@ -132,9 +138,8 @@ public class NativeMojo extends AbstractJfxToolsMojo {
      *         &lt;jvmArg&gt;-Xmx8G&lt;/jvmArg&gt;
      *     &lt;/jvmArgs&gt;
      * </pre>
-     *
-     * @parameter property="jfx.jvmArgs"
      */
+    @Parameter(property = "jfx.jvmArgs")
     protected List<String> jvmArgs;
 
     /**
@@ -144,16 +149,14 @@ public class NativeMojo extends AbstractJfxToolsMojo {
      * <p>
      * These options are user overridable for the value part of the entry via user preferences. The key and the value
      * are concated without a joining character when invoking the JVM.
-     *
-     * @parameter property="jfx.userJvmArgs"
      */
+    @Parameter(property = "jfx.userJvmArgs")
     protected Map<String, String> userJvmArgs;
 
     /**
      * You can specify arguments that gonna be passed when calling your application.
-     *
-     * @parameter property="jfx.launcherArguments"
      */
+    @Parameter(property = "jfx.launcherArguments")
     protected List<String> launcherArguments;
 
     /**
@@ -163,25 +166,22 @@ public class NativeMojo extends AbstractJfxToolsMojo {
      * a version and don't really care.
      * Normally all non-number signs and dots are removed from the value, which can be disabled
      * by setting 'skipNativeVersionNumberSanitizing' to true.
-     *
-     * @parameter property="jfx.nativeReleaseVersion" default-value="1.0"
      */
+    @Parameter(property = "jfx.nativeReleaseVersion", defaultValue = "1.0")
     protected String nativeReleaseVersion;
 
     /**
      * Set this to true if you would like your application to have a shortcut on the users desktop (or platform
      * equivalent) when it is installed.
-     *
-     * @parameter property="jfx.needShortcut" default-value=false
      */
+    @Parameter(property = "jfx.needShortcut", defaultValue = "false")
     protected boolean needShortcut;
 
     /**
      * Set this to true if you would like your application to have a link in the main system menu (or platform
      * equivalent) when it is installed.
-     *
-     * @parameter property="jfx.needMenu" default-value=false
      */
+    @Parameter(property = "jfx.needMenu", defaultValue = "false")
     protected boolean needMenu;
 
     /**
@@ -193,9 +193,8 @@ public class NativeMojo extends AbstractJfxToolsMojo {
      * To disable creating native bundles with JRE in it, just add "&lt;runtime /&gt;" to bundleArguments.
      * <p>
      * If there are bundle arguments that override other fields in the configuration, then it is an execution error.
-     *
-     * @parameter property="jfx.bundleArguments"
      */
+    @Parameter(property = "jfx.bundleArguments")
     protected Map<String, String> bundleArguments;
 
     /**
@@ -203,33 +202,29 @@ public class NativeMojo extends AbstractJfxToolsMojo {
      * be the finalName as set in your project. Change this if you want something nicer. This also has effect on the
      * filename of icon-files, e.g. having 'NiceApp' as appName means you have to place that icon
      * at 'src/main/deploy/package/[os]/NiceApp.[icon-extension]' for having it picked up by the bundler.
-     *
-     * @parameter property="jfx.appName" default-value="${project.build.finalName}"
      */
+    @Parameter(property = "jfx.appName", defaultValue = "${project.build.finalName}")
     protected String appName;
 
     /**
      * Will be set when having goal "build-native" within package-phase and calling "jfx:native" from CLI. Internal usage only.
-     *
-     * @parameter default-value=false
      */
+    @Parameter(defaultValue = "false")
     protected boolean jfxCallFromCLI;
 
     /**
      * When you need to add additional files to generated app-folder (e.g. README, license, third-party-tools, ...),
      * you can specify the source-folder here. All files will be copied recursively.
-     *
-     * @parameter property="jfx.additionalAppResources"
      */
+    @Parameter(property = "jfx.additionalAppResources")
     protected File additionalAppResources;
 
     /**
      * When you need to add additional files to the base-folder of all bundlers (additional non-overriding files like
      * images, licenses or separated modules for encryption etc.) you can specify the source-folder here. All files
      * will be copied recursively. Please make sure to inform yourself about the details of the used bundler.
-     *
-     * @parameter property="jfx.additionalBundlerResources"
      */
+    @Parameter(property = "jfx.additionalBundlerResources")
     protected File additionalBundlerResources;
 
     /**
@@ -250,14 +245,11 @@ public class NativeMojo extends AbstractJfxToolsMojo {
      * Change this to "true" when you don't want this workaround.
      *
      * @see https://github.com/javafx-maven-plugin/javafx-maven-plugin/issues/124
-     *
-     * @parameter property="jfx.skipNativeLauncherWorkaround124" default-value=false
      */
+    @Parameter(property = "jfx.skipNativeLauncherWorkaround124", defaultValue = "false")
     protected boolean skipNativeLauncherWorkaround124;
 
-    /**
-     * @parameter property="jfx.secondaryLaunchers"
-     */
+    @Parameter(property = "jfx.secondaryLaunchers")
     protected List<NativeLauncher> secondaryLaunchers;
 
     /**
@@ -269,8 +261,8 @@ public class NativeMojo extends AbstractJfxToolsMojo {
      * Change this to "true" when you don't want this workaround.
      *
      * @see https://github.com/javafx-maven-plugin/javafx-maven-plugin/issues/167
-     * @parameter property="jfx.skipNativeLauncherWorkaround167" default-value=false
      */
+    @Parameter(property = "jfx.skipNativeLauncherWorkaround167", defaultValue = "false")
     protected boolean skipNativeLauncherWorkaround167;
 
     /**
@@ -279,9 +271,8 @@ public class NativeMojo extends AbstractJfxToolsMojo {
      * them to second launchers.
      * <p>
      * For more informatione, please see official information source: https://docs.oracle.com/javase/8/docs/technotes/guides/deploy/javafx_ant_task_reference.html#CIAIDHBJ
-     *
-     * @parameter property="jfx.fileAssociations"
      */
+    @Parameter(property = "jfx.fileAssociations")
     private List<FileAssociation> fileAssociations;
 
     /**
@@ -289,46 +280,40 @@ public class NativeMojo extends AbstractJfxToolsMojo {
      * a bug while generating relative file-references when building on windows.
      * <p>
      * Change this to "true" when you don't want this workaround.
-     *
-     * @parameter property="jfx.skipJNLPRessourcePathWorkaround182"
      */
+    @Parameter(property = "jfx.skipJNLPRessourcePathWorkaround182")
     protected boolean skipJNLPRessourcePathWorkaround182;
 
     /**
      * The location of the keystore. If not set, this will default to src/main/deploy/kesytore.jks which is usually fine
      * to use for most cases.
-     *
-     * @parameter property="jfx.keyStore" default-value="src/main/deploy/keystore.jks"
      */
+    @Parameter(property = "jfx.keyStore", defaultValue = "src/main/deploy/keystore.jks")
     protected File keyStore;
 
     /**
      * The alias to use when accessing the keystore. This will default to "myalias".
-     *
-     * @parameter property="jfx.keyStoreAlias" default-value="myalias"
      */
+    @Parameter(property = "jfx.keyStoreAlias", defaultValue = "myalias")
     protected String keyStoreAlias;
 
     /**
      * The password to use when accessing the keystore. This will default to "password".
-     *
-     * @parameter property="jfx.keyStorePassword" default-value="password"
      */
+    @Parameter(property = "jfx.keyStorePassword", defaultValue = "password")
     protected String keyStorePassword;
 
     /**
      * The password to use when accessing the key within the keystore. If not set, this will default to
      * keyStorePassword.
-     *
-     * @parameter property="jfx.keyPassword"
      */
+    @Parameter(property = "jfx.keyPassword")
     protected String keyPassword;
 
     /**
      * The type of KeyStore being used. This defaults to "jks", which is the normal one.
-     *
-     * @parameter property="jfx.keyStoreType" default-value="jks"
      */
+    @Parameter(property = "jfx.keyStoreType", defaultValue = "jks")
     protected String keyStoreType;
 
     /**
@@ -338,9 +323,8 @@ public class NativeMojo extends AbstractJfxToolsMojo {
      * of that new bundler (mostly because the old one does not fit the bundler-list strategy).
      * <p>
      * Change this to "true" when you don't want signing jar-files.
-     *
-     * @parameter property="jfx.skipSigningJarFilesJNLP185" default-value=false
      */
+    @Parameter(property = "jfx.skipSigningJarFilesJNLP185", defaultValue = "false")
     protected boolean skipSigningJarFilesJNLP185;
 
     /**
@@ -348,9 +332,8 @@ public class NativeMojo extends AbstractJfxToolsMojo {
      * so we have to fix these sizes to be correct. This sizes-fix even lacks in the old web-MOJO.
      * <p>
      * Change this to "true" when you don't want to recalculate sizes of jar-files.
-     *
-     * @parameter property="jfx.skipSizeRecalculationForJNLP185" default-value=false
      */
+    @Parameter(property = "jfx.skipSizeRecalculationForJNLP185", defaultValue = "false")
     protected boolean skipSizeRecalculationForJNLP185;
 
     /**
@@ -361,9 +344,8 @@ public class NativeMojo extends AbstractJfxToolsMojo {
      * for having your jar-files getting signed when generating JNLP-files.
      *
      * @see https://github.com/javafx-maven-plugin/javafx-maven-plugin/issues/190
-     *
-     * @parameter property="jfx.noBlobSigning" default-value=false
      */
+    @Parameter(property = "jfx.noBlobSigning", defaultValue = "false")
     protected boolean noBlobSigning;
 
     /**
@@ -372,9 +354,8 @@ public class NativeMojo extends AbstractJfxToolsMojo {
      * want to use, declare them as compile-depencendies and run `mvn jfx:native`
      * or by using maven lifecycle.
      * You have to implement the Bundler-interface (@see com.oracle.tools.packager.Bundler).
-     *
-     * @parameter property="jfx.customBundlers"
      */
+    @Parameter(property = "jfx.customBundlers")
     protected List<String> customBundlers;
 
     /**
@@ -386,35 +367,28 @@ public class NativeMojo extends AbstractJfxToolsMojo {
      * Requires skipNativeLauncherWorkaround124 to be false.
      *
      * @see https://github.com/javafx-maven-plugin/javafx-maven-plugin/issues/205
-     *
-     * @parameter property="jfx.skipNativeLauncherWorkaround205" default-value=false
      */
+    @Parameter(property = "jfx.skipNativeLauncherWorkaround205", defaultValue = "false")
     protected boolean skipNativeLauncherWorkaround205;
 
-    /**
-     * @parameter property="jfx.skipMacBundlerWorkaround" default-value=false
-     */
+    @Parameter(property = "jfx.skipMacBundlerWorkaround", defaultValue = "false")
     protected boolean skipMacBundlerWorkaround = false;
 
     /**
      * Per default his plugin does not break the build if any bundler is failing. If you want
      * to fail the build and not just print a warning, please set this to true.
-     *
-     * @parameter property="jfx.failOnError" default-value=false
      */
+    @Parameter(property = "jfx.failOnError", defaultValue = "false")
     protected boolean failOnError = false;
 
-    /**
-     * @parameter property="jfx.onlyCustomBundlers" default-value=false
-     */
+    @Parameter(property = "jfx.onlyCustomBundlers", defaultValue = "false")
     protected boolean onlyCustomBundlers = false;
 
     /**
      * If you don't want to create a JNLP-bundle, set this to true to avoid that ugly warning
      * in the build-log.
-     *
-     * @parameter property="jfx.skipJNLP" default-value=false
      */
+    @Parameter(property = "jfx.skipJNLP", defaultValue = "false")
     protected boolean skipJNLP = false;
 
     /**
@@ -424,41 +398,36 @@ public class NativeMojo extends AbstractJfxToolsMojo {
      * this to true for skipping the removal of the "evil" chars.
      *
      * @since 8.8.0
-     *
-     * @parameter property="jfx.skipNativeVersionNumberSanitizing" default-value=false
      */
+    @Parameter(property = "jfx.skipNativeVersionNumberSanitizing", defaultValue = "false")
     protected boolean skipNativeVersionNumberSanitizing = false;
 
     /**
      * Since it it possible to sign created jar-files using jarsigner, it might be required to
      * add some special parameters for calling it (like -tsa and -tsacert). Just add them to this
      * list to have them being applied.
-     *
-     * @parameter property="jfx.additionalJarsignerParameters"
      */
+    @Parameter(property = "jfx.additionalJarsignerParameters")
     protected List<String> additionalJarsignerParameters = new ArrayList<>();
 
     /**
      * Set this to true, to not scan for the specified main class inside the generated/copied jar-files.
      * <p>
      * Check only works for the main launcher, any secondary launchers are not checked.
-     *
-     * @parameter property="jfx.skipMainClassScanning"
      */
+    @Parameter(property = "jfx.skipMainClassScanning", defaultValue = "false")
     protected boolean skipMainClassScanning = false;
 
     /**
      * Set this to true to disable the file-existence check on the keystore.
-     *
-     * @parameter property="jfx.skipKeyStoreChecking"
      */
+    @Parameter(property = "jfx.skipKeyStoreChecking", defaultValue = "false")
     protected boolean skipKeyStoreChecking = false;
 
     /**
      * Set this to true to remove "-keypass"-part while signing via jarsigner.
-     *
-     * @parameter property="jfx.skipKeypassWhileSigning"
      */
+    @Parameter(property = "jfx.skipKeypassWhileSigning", defaultValue = "false")
     protected boolean skipKeypassWhileSigning = false;
 
     protected WindowsSpecificWorkarounds windowsSpecificWorkarounds = null;
@@ -473,7 +442,7 @@ public class NativeMojo extends AbstractJfxToolsMojo {
             return;
         }
 
-        if( skip ){
+        if( baseSettings.isSkip() ){
             getLog().info("Skipping execution of NativeMojo MOJO.");
             return;
         }
@@ -489,7 +458,7 @@ public class NativeMojo extends AbstractJfxToolsMojo {
             Map<String, ? super Object> params = new HashMap<>();
 
             // make bundlers doing verbose output (might not always be as verbose as expected)
-            params.put(StandardBundlerParam.VERBOSE.getID(), verbose);
+            params.put(StandardBundlerParam.VERBOSE.getID(), baseSettings.isVerbose());
 
             Optional.ofNullable(identifier).ifPresent(id -> {
                 params.put(StandardBundlerParam.IDENTIFIER.getID(), id);
@@ -504,7 +473,7 @@ public class NativeMojo extends AbstractJfxToolsMojo {
             params.put(StandardBundlerParam.VENDOR.getID(), vendor);
             params.put(StandardBundlerParam.SHORTCUT_HINT.getID(), needShortcut);
             params.put(StandardBundlerParam.MENU_HINT.getID(), needMenu);
-            params.put(StandardBundlerParam.MAIN_CLASS.getID(), mainClass);
+            params.put(StandardBundlerParam.MAIN_CLASS.getID(), jfxJarSettings.getMainClass());
 
             Optional.ofNullable(jvmProperties).ifPresent(jvmProps -> {
                 params.put(StandardBundlerParam.JVM_PROPERTIES.getID(), new HashMap<>(jvmProps));
@@ -523,9 +492,9 @@ public class NativeMojo extends AbstractJfxToolsMojo {
             // https://github.com/javafx-maven-plugin/javafx-maven-plugin/issues/83
             Optional.ofNullable(additionalAppResources).filter(File::exists).ifPresent(appResources -> {
                 try{
-                    Path targetFolder = jfxAppOutputDir.toPath();
+                    Path targetFolder = jfxJarSettings.getOutputFolderName().toPath();
                     Path sourceFolder = appResources.toPath();
-                    fileHelper.copyRecursive(sourceFolder, targetFolder, getLog());
+                    new FileHelper().copyRecursive(sourceFolder, targetFolder, getLog());
                 } catch(IOException e){
                     getLog().warn(e);
                 }
@@ -534,7 +503,7 @@ public class NativeMojo extends AbstractJfxToolsMojo {
             // gather all files for our application bundle
             Set<File> resourceFiles = new HashSet<>();
             try{
-                Files.walk(jfxAppOutputDir.toPath())
+                Files.walk(jfxJarSettings.getOutputFolderName().toPath())
                         .map(p -> p.toFile())
                         .filter(File::isFile)
                         .filter(File::canRead)
@@ -545,7 +514,7 @@ public class NativeMojo extends AbstractJfxToolsMojo {
             } catch(IOException e){
                 getLog().warn(e);
             }
-            params.put(StandardBundlerParam.APP_RESOURCES.getID(), new RelativeFileSet(jfxAppOutputDir, resourceFiles));
+            params.put(StandardBundlerParam.APP_RESOURCES.getID(), new RelativeFileSet(jfxJarSettings.getOutputFolderName(), resourceFiles));
 
             // check for misconfiguration
             Collection<String> duplicateKeys = new HashSet<>();
@@ -560,10 +529,10 @@ public class NativeMojo extends AbstractJfxToolsMojo {
             }
 
             if( !skipMainClassScanning ){
-                boolean mainClassInsideResourceJarFile = resourceFiles.stream().filter(resourceFile -> resourceFile.toString().endsWith(".jar")).filter(resourceJarFile -> isClassInsideJarFile(mainClass, resourceJarFile)).findFirst().isPresent();
+                boolean mainClassInsideResourceJarFile = resourceFiles.stream().filter(resourceFile -> resourceFile.toString().endsWith(".jar")).filter(resourceJarFile -> isClassInsideJarFile(jfxJarSettings.getMainClass(), resourceJarFile)).findFirst().isPresent();
                 if( !mainClassInsideResourceJarFile ){
                     // warn user about missing class-file
-                    getLog().warn(String.format("Class with name %s was not found inside provided jar files!! JavaFX-application might not be working !!", mainClass));
+                    getLog().warn(String.format("Class with name %s was not found inside provided jar files!! JavaFX-application might not be working !!", jfxJarSettings.getMainClass()));
                 }
             }
 
@@ -822,7 +791,7 @@ public class NativeMojo extends AbstractJfxToolsMojo {
             Path additionalBundlerResourcesPath = additionalBundlerResources.toPath();
             Path resolvedBundlerFolder = additionalBundlerResourcesPath.resolve(currentRunningBundlerID);
 
-            if( verbose ){
+            if( baseSettings.isVerbose() ){
                 getLog().info("Additional bundler resources are specified, trying to copy all files into build root, using:" + additionalBundlerResources.getAbsolutePath());
             }
 
@@ -861,7 +830,7 @@ public class NativeMojo extends AbstractJfxToolsMojo {
             if( !skipCopyAdditionalBundlerResources ){
                 // new behaviour, use bundler-name as folder-name
                 if( Files.exists(resolvedBundlerFolder) ){
-                    if( verbose ){
+                    if( baseSettings.isVerbose() ){
                         getLog().info("Found additional bundler resources for bundler " + currentRunningBundlerID);
                     }
                     sourceFolder = resolvedBundlerFolder;
@@ -911,16 +880,16 @@ public class NativeMojo extends AbstractJfxToolsMojo {
                             break;
                     }
                 } else {
-                    if( verbose ){
+                    if( baseSettings.isVerbose() ){
                         getLog().info("No additional bundler resources for bundler " + currentRunningBundlerID + " were found, copying all files instead.");
                     }
                 }
                 if( !skipCopyAdditionalBundlerResources ){
                     try{
-                        if( verbose ){
+                        if( baseSettings.isVerbose() ){
                             getLog().info("Copying additional bundler resources into: " + targetFolder.toFile().getAbsolutePath());
                         }
-                        fileHelper.copyRecursive(sourceFolder, targetFolder, getLog());
+                        new FileHelper().copyRecursive(sourceFolder, targetFolder, getLog());
                     } catch(IOException e){
                         getLog().warn("Couldn't copy additional bundler resource-file(s).", e);
                     }
@@ -998,20 +967,26 @@ public class NativeMojo extends AbstractJfxToolsMojo {
         checkSigningConfiguration();
 
         SignJarParams signJarParams = new SignJarParams();
-        signJarParams.setVerbose(verbose);
+        signJarParams.setVerbose(baseSettings.isVerbose());
         signJarParams.setKeyStore(keyStore);
         signJarParams.setAlias(keyStoreAlias);
         signJarParams.setStorePass(keyStorePassword);
         signJarParams.setKeyPass(keyPassword);
         signJarParams.setStoreType(keyStoreType);
 
-        signJarParams.addResource(nativeOutputDir, jfxMainAppJarName);
+        signJarParams.addResource(nativeOutputDir, jfxJarSettings.getJfxMainAppJarName());
 
         // add all gathered jar-files as resources so be signed
         genericWorkarounds.getJARFilesFromJNLPFiles().forEach(jarFile -> signJarParams.addResource(nativeOutputDir, jarFile));
 
         getLog().info("Signing JAR files for jnlp bundle using BLOB-method");
-        getPackagerLib().signJar(signJarParams);
+        try{
+            JavaTools.addFolderToClassloader(baseSettings.getDeployDir());
+        } catch(Exception e){
+            throw new MojoExecutionException("Unable to sign JFX JAR", e);
+        }
+        Log.setLogger(new Log.Logger(baseSettings.isVerbose()));
+        new PackagerLib().signJar(signJarParams);
     }
 
     protected void signJarFiles() throws MojoFailureException, PackagerException, MojoExecutionException {
@@ -1059,7 +1034,7 @@ public class NativeMojo extends AbstractJfxToolsMojo {
 
     protected void signJar(File jarFile) throws MojoExecutionException {
         List<String> command = new ArrayList<>();
-        command.add(getEnvironmentRelativeExecutablePath() + "jarsigner");
+        command.add(JavaTools.getExecutablePath(nativeAppSettings.isUseEnvironmentRelativeExecutables()) + "jarsigner");
 
         // check is required for non-file keystores, see #291
         AtomicBoolean containsKeystore = new AtomicBoolean(false);
@@ -1086,17 +1061,17 @@ public class NativeMojo extends AbstractJfxToolsMojo {
         command.add(jarFile.getAbsolutePath());
         command.add(keyStoreAlias);
 
-        if( verbose ){
+        if( baseSettings.isVerbose() ){
             command.add("-verbose");
         }
 
         try{
             ProcessBuilder pb = new ProcessBuilder()
                     .inheritIO()
-                    .directory(project.getBasedir())
+                    .directory(mavenSettings.getProject().getBasedir())
                     .command(command);
 
-            if( verbose ){
+            if( baseSettings.isVerbose() ){
                 getLog().info("Running command: " + String.join(" ", command));
             }
 

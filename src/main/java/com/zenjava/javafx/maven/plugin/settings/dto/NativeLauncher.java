@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.zenjava.javafx.maven.plugin;
+package com.zenjava.javafx.maven.plugin.settings.dto;
 
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import org.apache.maven.plugins.annotations.Parameter;
 
 /**
  * Data transfer object for configuring secondary native launchers. These fields are all like when calling 'mvn jfx:native'.
@@ -28,69 +29,47 @@ public class NativeLauncher {
 
     /**
      * This has to be different than original appname, as all existing parameter are copied and this would be overwritten.
-     *
-     * @parameter
-     * @required
      */
+    @Parameter(required = true)
     private String appName = null;
 
-    /**
-     * @parameter
-     */
+    @Parameter
     private String mainClass = null;
 
-    /**
-     * @parameter
-     */
+    @Parameter
     private File jfxMainAppJarName = null;
 
-    /**
-     * @parameter
-     */
+    @Parameter
     private Map<String, String> jvmProperties = null;
 
-    /**
-     * @parameter
-     */
+    @Parameter
     private List<String> jvmArgs = null;
 
-    /**
-     * @parameter
-     */
+    @Parameter
     private Map<String, String> userJvmArgs = null;
 
-    /**
-     * @parameter default-value="1.0"
-     */
-    private String nativeReleaseVersion = null;
+    @Parameter(defaultValue = "1.0")
+    private String nativeReleaseVersion = "1.0";
 
-    /**
-     * @parameter default-value=false
-     */
-    private boolean needShortcut;
+    @Parameter(defaultValue = "false")
+    private boolean needShortcut = false;
 
-    /**
-     * @parameter default-value=false
-     */
+    @Parameter(defaultValue = "false")
     private boolean needMenu;
 
-    /**
-     * @parameter
-     */
+    @Parameter
     private String vendor = null;
 
-    /**
-     * @parameter
-     */
+    @Parameter
     private String identifier = null;
 
     /**
      * To override default generated classpath, set this to your wanted value.
-     *
-     * @parameter
      */
+    @Parameter
     private String classpath = null;
 
+    @Parameter
     private List<String> launcherArguments = null;
 
     public String getMainClass() {

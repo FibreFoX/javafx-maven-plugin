@@ -15,10 +15,45 @@
  */
 package com.zenjava.javafx.maven.plugin.settings;
 
+import com.zenjava.javafx.maven.plugin.settings.dto.FileAssociation;
+import java.util.List;
+import org.apache.maven.plugins.annotations.Parameter;
+
 /**
  *
  * @author FibreFoX
  */
 public class NativeInstallerSettings {
+
+    @Parameter(defaultValue = "false")
+    private boolean createShortcut = false;
+    @Parameter(defaultValue = "false")
+    private boolean createMenu = false;
+    @Parameter
+    private List<FileAssociation> fileAssociations;
+
+    public boolean isCreateShortcut() {
+        return createShortcut;
+    }
+
+    public void setCreateShortcut(boolean createShortcut) {
+        this.createShortcut = createShortcut;
+    }
+
+    public boolean isCreateMenu() {
+        return createMenu;
+    }
+
+    public void setCreateMenu(boolean createMenu) {
+        this.createMenu = createMenu;
+    }
+
+    public List<FileAssociation> getFileAssociations() {
+        return fileAssociations;
+    }
+
+    public void setFileAssociations(List<FileAssociation> fileAssociations) {
+        this.fileAssociations = fileAssociations;
+    }
 
 }

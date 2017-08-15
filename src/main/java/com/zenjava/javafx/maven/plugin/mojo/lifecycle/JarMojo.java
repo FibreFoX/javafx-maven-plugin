@@ -15,10 +15,12 @@
  */
 package com.zenjava.javafx.maven.plugin.mojo.lifecycle;
 
+import com.oracle.tools.packager.Log;
 import com.zenjava.javafx.maven.plugin.utils.JavaTools;
 import com.sun.javafx.tools.packager.CreateJarParams;
-import com.sun.javafx.tools.packager.PackagerException;
-import com.zenjava.javafx.maven.plugin.AbstractJfxToolsMojo;
+import com.sun.javafx.tools.packager.PackagerLib;
+import com.zenjava.javafx.maven.plugin.AbstractJfxMojo;
+import com.zenjava.javafx.maven.plugin.settings.JfxJarSettings;
 import com.zenjava.javafx.maven.plugin.utils.FileHelper;
 
 import org.apache.maven.model.Build;
@@ -36,154 +38,30 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.maven.artifact.Artifact;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 
-/**
- * @goal build-jar
- * @phase package
- * @requiresDependencyResolution
- */
-public class JarMojo extends AbstractJfxToolsMojo {
+@Mojo(
+        name = "build-jar",
+        requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME,
+        defaultPhase = LifecyclePhase.PACKAGE
+)
+public class JarMojo extends AbstractJfxMojo {
 
-    /**
-     * Flag to switch on and off the compiling of CSS files to the binary format. In theory this has some minor
-     * performance gains, but it's debatable whether you will notice them, and some people have experienced problems
-     * with the resulting compiled files. Use at your own risk. By default this is false and CSS files are left in their
-     * plain text format as they are found.
-     *
-     * @parameter property="jfx.css2bin" default-value=false
-     */
-    protected boolean css2bin;
-
-    /**
-     * A custom class that can act as a Pre-Loader for your app. The Pre-Loader is run before anything else and is
-     * useful for showing splash screens or similar 'progress' style windows. For more information on Pre-Loaders, see
-     * the official JavaFX packaging documentation.
-     *
-     * @parameter property="jfx.preLoader"
-     */
-    protected String preLoader;
-
-    /**
-     * Flag to switch on updating the existing jar created with maven. The jar to be updated is taken from
-     * '${project.basedir}/target/${project.build.finalName}.jar'.
-     * <p>
-     * This makes all entries inside MANIFEST.MF being transfered to the jfx-jar.
-     *
-     * @parameter property="jfx.updateExistingJar" default-value=false
-     */
-    protected boolean updateExistingJar;
-
-    /**
-     * Set this to true if your app needs to break out of the standard web sandbox and do more powerful functions.
-     * <p>
-     * If you are using FXML you will need to set this value to true.
-     *
-     * @parameter property="jfx.allPermissions" default-value=false
-     */
-    protected boolean allPermissions;
+    @Parameter(name = "jfxJarSettings")
+    protected JfxJarSettings jfxJarSettings = null;
 
     /**
      * Will be set when having goal "build-jar" within package-phase and calling "jfx:jar" or "jfx:native" from CLI. Internal usage only.
-     *
-     * @parameter default-value=false
      */
-    protected boolean jfxCallFromCLI;
-
-    /**
-     * To add custom manifest-entries, just add each entry/value-pair here.
-     *
-     * @parameter property="jfx.manifestAttributes"
-     */
-    protected Map<String, String> manifestAttributes;
-
-    /**
-     * For being able to use &lt;userJvmArgs&gt;, we have to copy some dependency when being used. To disable this feature an not having packager.jar
-     * in your project, set this to false.
-     * <p>
-     * To get more information about, please check the documentation here: https://docs.oracle.com/javase/8/docs/technotes/guides/deploy/jvm_options_api.html.
-     *
-     * @parameter property="jfx.addPackagerJar" default-value=true
-     * @since 8.1.4
-     */
-    protected boolean addPackagerJar;
-
-    /**
-     * In the case you don't want some dependency landing in the generated lib-folder (e.g. complex maven-dependencies),
-     * you now can manually exclude that dependency by added it's coordinates here.
-     *
-     * @parameter property="jfx.classpathExcludes"
-     * @since 8.2.0
-     */
-    protected List<Dependency> classpathExcludes = new ArrayList<>();
-
-    /**
-     * Per default all listed classpath excludes are ment to be transivie, that means when any direct declared dependency
-     * requires another dependency.
-     * <p>
-     * When having &lt;classpathExcludes&gt; contains any dependency, that dependency including all transitive dependencies
-     * are filtered while processing lib-files, it's the default behaviour. In the rare case you have some very special setup,
-     * and just want to exlude these dependency, but want to preserve all transitive dependencies going into the lib-folder,
-     * this can be set via this property.
-     * <p>
-     * Set this to false when you want to have the direct declared dependency excluded from lib-file-processing.
-     *
-     * @parameter property="jfx.classpathExcludesTransient" default-value=true
-     * @since 8.2.0
-     */
-    protected boolean classpathExcludesTransient;
-
-    /**
-     * When you need to add additional files to generated app-folder (e.g. README, license, third-party-tools, ...),
-     * you can specify the source-folder here. All files will be copied recursively.
-     *
-     * @parameter property="jfx.additionalAppResources"
-     */
-    protected File additionalAppResources;
-
-    /**
-     * It is possible to copy all files specified by additionalAppResources into the created app-folder containing
-     * your jfx-jar. This makes it possible to have external files (like native binaries) being available while
-     * developing using the run-mojo.
-     *
-     * @parameter property="jfx.copyAdditionalAppResourcesToJar" default-value="false"
-     */
-    protected boolean copyAdditionalAppResourcesToJar = false;
-
-    /**
-     * To skip copying all dependencies, set this to true. Please note that all dependencies will be added to the
-     * manifest-classpath as normal, only the copy-process gets skipped.
-     *
-     * @since 8.8.0
-     *
-     * @parameter property="jfx.skipCopyingDependencies"
-     */
-    protected boolean skipCopyingDependencies = false;
-
-    /**
-     * @since 8.8.0
-     *
-     * @parameter property="jfx.useLibFolderContentForManifestClasspath" default-value="false"
-     */
-    protected boolean useLibFolderContentForManifestClasspath = false;
-
-    /**
-     * @since 8.8.0
-     *
-     * @parameter property="jfx.fixedManifestClasspath" default-value=""
-     */
-    protected String fixedManifestClasspath = null;
-
-    /**
-     * @since 8.9.0
-     *
-     * @parameter property="jfx.attachAsZippedArtifact" default-value="false"
-     */
-    protected boolean attachAsZippedArtifact = false;
+    @Parameter(name = "jfxCallFromCLI", defaultValue = "false")
+    protected boolean jfxCallFromCLI = false;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -192,41 +70,41 @@ public class JarMojo extends AbstractJfxToolsMojo {
             return;
         }
 
-        if( skip ){
+        if( baseSettings.isSkip() ){
             getLog().info("Skipping execution of JarMojo MOJO.");
             return;
         }
 
         getLog().info("Building JavaFX JAR for application");
 
-        Build build = project.getBuild();
+        Build build = mavenSettings.getProject().getBuild();
 
         CreateJarParams createJarParams = new CreateJarParams();
-        createJarParams.setOutdir(jfxAppOutputDir);
+        createJarParams.setOutdir(jfxJarSettings.getOutputFolderName());
 
         // check if we got some filename ending with ".jar" (found this while checking issue 128)
-        if( !jfxMainAppJarName.toLowerCase().endsWith(".jar") ){
+        if( !jfxJarSettings.getJfxMainAppJarName().toLowerCase().endsWith(".jar") ){
             getLog().error("Please provide a proper value for <jfxMainAppJarName>! It has to end with \".jar\".");
             return;
         }
 
-        createJarParams.setOutfile(jfxMainAppJarName);
-        createJarParams.setApplicationClass(mainClass);
-        createJarParams.setCss2bin(css2bin);
-        createJarParams.setPreloader(preLoader);
+        createJarParams.setOutfile(jfxJarSettings.getJfxMainAppJarName());
+        createJarParams.setApplicationClass(jfxJarSettings.getMainClass());
+        createJarParams.setCss2bin(jfxJarSettings.isCss2bin());
+        createJarParams.setPreloader(jfxJarSettings.getPreLoader());
 
-        if( manifestAttributes == null ){
-            manifestAttributes = new HashMap<>();
+        if( jfxJarSettings.getManifestAttributes() == null ){
+            jfxJarSettings.setManifestAttributes(new HashMap<>());
         }
-        createJarParams.setManifestAttrs(manifestAttributes);
+        createJarParams.setManifestAttrs(jfxJarSettings.getManifestAttributes());
 
         StringBuilder classpath = new StringBuilder();
-        File libDir = new File(jfxAppOutputDir, libFolderName);
+        File libDir = new File(jfxJarSettings.getOutputFolderName(), jfxJarSettings.getLibFolderName());
         if( !libDir.exists() && !libDir.mkdirs() ){
             throw new MojoExecutionException("Unable to create app lib dir: " + libDir);
         }
 
-        if( updateExistingJar ){
+        if( jfxJarSettings.isUpdateExistingJar() ){
             File potentialExistingFile = new File(build.getDirectory() + File.separator + build.getFinalName() + ".jar");
             if( !potentialExistingFile.exists() ){
                 throw new MojoExecutionException("Could not update existing jar-file, because it does not exist. Please make sure this file gets created or exists, or set updateExistingJar to false.");
@@ -245,10 +123,10 @@ public class JarMojo extends AbstractJfxToolsMojo {
         try{
             if( checkIfJavaIsHavingPackagerJar() ){
                 getLog().debug("Check if packager.jar needs to be added");
-                if( addPackagerJar && !skipCopyingDependencies ){
+                if( jfxJarSettings.isAddPackagerJar() && !jfxJarSettings.isSkipCopyingDependencies() ){
                     getLog().debug("Searching for packager.jar ...");
-                    String targetPackagerJarPath = libFolderName + File.separator + "packager.jar";
-                    for( Dependency dependency : project.getDependencies() ){
+                    String targetPackagerJarPath = jfxJarSettings.getLibFolderName() + File.separator + "packager.jar";
+                    for( Dependency dependency : mavenSettings.getProject().getDependencies() ){
                         // check only system-scoped
                         if( "system".equalsIgnoreCase(dependency.getScope()) ){
                             File packagerJarFile = new File(dependency.getSystemPath());
@@ -260,7 +138,7 @@ public class JarMojo extends AbstractJfxToolsMojo {
                                     Files.copy(packagerJarFile.toPath(), dest.toPath());
                                 }
                                 // this is for INSIDE the manifes-file, so always use "/"
-                                classpath.append(libFolderName).append("/").append(packagerJarFile.getName()).append(" ");
+                                classpath.append(jfxJarSettings.getLibFolderName()).append("/").append(packagerJarFile.getName()).append(" ");
                             }
                         }
                     }
@@ -268,17 +146,17 @@ public class JarMojo extends AbstractJfxToolsMojo {
                     getLog().debug("No packager.jar will be added");
                 }
             } else {
-                if( addPackagerJar ){
+                if( jfxJarSettings.isAddPackagerJar() ){
                     getLog().warn("Skipped checking for packager.jar. Please install at least Java 1.8u40 for using this feature.");
                 }
             }
             List<String> brokenArtifacts = new ArrayList<>();
-            project.getArtifacts().stream().filter(artifact -> {
+            mavenSettings.getProject().getArtifacts().stream().filter(artifact -> {
                 // filter all unreadable, non-file artifacts
                 File artifactFile = artifact.getFile();
                 return artifactFile.isFile() && artifactFile.canRead();
             }).filter(artifact -> {
-                if( classpathExcludes.isEmpty() ){
+                if( jfxJarSettings.getClasspathExcludes().isEmpty() ){
                     return true;
                 }
                 boolean isListedInList = isListedInExclusionList(artifact);
@@ -289,7 +167,7 @@ public class JarMojo extends AbstractJfxToolsMojo {
                 File dest = new File(libDir, artifactFile.getName());
                 if( !dest.exists() ){
                     try{
-                        if( !skipCopyingDependencies ){
+                        if( !jfxJarSettings.isSkipCopyingDependencies() ){
                             Files.copy(artifactFile.toPath(), dest.toPath());
                         } else {
                             getLog().info(String.format("Skipped copying classpath element: %s", artifactFile.getAbsolutePath()));
@@ -300,7 +178,7 @@ public class JarMojo extends AbstractJfxToolsMojo {
                         brokenArtifacts.add(artifactFile.getAbsolutePath());
                     }
                 }
-                classpath.append(libFolderName).append("/").append(artifactFile.getName()).append(" ");
+                classpath.append(jfxJarSettings.getLibFolderName()).append("/").append(artifactFile.getName()).append(" ");
             });
             if( !brokenArtifacts.isEmpty() ){
                 throw new MojoExecutionException("Error copying dependencies for application");
@@ -309,13 +187,13 @@ public class JarMojo extends AbstractJfxToolsMojo {
             throw new MojoExecutionException("Error copying dependency for application", e);
         }
 
-        if( useLibFolderContentForManifestClasspath ){
+        if( jfxJarSettings.isUseLibFolderContentForManifestClasspath() ){
             StringBuilder scannedClasspath = new StringBuilder();
             try{
                 Files.walkFileTree(libDir.toPath(), new SimpleFileVisitor<Path>() {
                     @Override
                     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                        scannedClasspath.append(libFolderName.replace("\\", "/")).append("/").append(libDir.toPath().relativize(file).toString().replace("\\", "/")).append(" ");
+                        scannedClasspath.append(jfxJarSettings.getLibFolderName().replace("\\", "/")).append("/").append(libDir.toPath().relativize(file).toString().replace("\\", "/")).append(" ");
                         return super.visitFile(file, attrs);
                     }
                 });
@@ -327,39 +205,43 @@ public class JarMojo extends AbstractJfxToolsMojo {
             createJarParams.setClasspath(classpath.toString());
         }
 
-        Optional.ofNullable(fixedManifestClasspath).ifPresent(manifestClasspath -> {
+        Optional.ofNullable(jfxJarSettings.getFixedManifestClasspath()).ifPresent(manifestClasspath -> {
             if( manifestClasspath.trim().isEmpty() ){
                 return;
             }
             createJarParams.setClasspath(manifestClasspath);
 
-            if( useLibFolderContentForManifestClasspath ){
+            if( jfxJarSettings.isUseLibFolderContentForManifestClasspath() ){
                 getLog().warn("You specified to use the content of the lib-folder AND specified a fixed classpath. The fixed classpath will get taken.");
             }
         });
 
         // https://docs.oracle.com/javase/8/docs/technotes/guides/deploy/manifest.html#JSDPG896
         // http://docs.oracle.com/javase/8/docs/technotes/guides/javaws/developersguide/syntax.html#security
-        if( allPermissions ){
-            manifestAttributes.put("Permissions", "all-permissions");
+        if( jfxJarSettings.isAllPermissions() ){
+            jfxJarSettings.getManifestAttributes().put("Permissions", "all-permissions");
         }
 
         try{
-            getPackagerLib().packageAsJar(createJarParams);
-        } catch(PackagerException e){
+            JavaTools.addFolderToClassloader(baseSettings.getDeployDir());
+
+            Log.setLogger(new Log.Logger(baseSettings.isVerbose()));
+
+            new PackagerLib().packageAsJar(createJarParams);
+        } catch(Exception e){
             throw new MojoExecutionException("Unable to build JFX JAR for application", e);
         }
 
-        if( copyAdditionalAppResourcesToJar ){
-            Optional.ofNullable(additionalAppResources)
+        if( jfxJarSettings.isCopyAdditionalAppResourcesToJar() ){
+            Optional.ofNullable(jfxJarSettings.getAdditionalAppResources())
                     .filter(File::exists)
                     .ifPresent(appResources -> {
                         getLog().info("Copying additional app ressources...");
 
                         try{
-                            Path targetFolder = jfxAppOutputDir.toPath();
+                            Path targetFolder = jfxJarSettings.getOutputFolderName().toPath();
                             Path sourceFolder = appResources.toPath();
-                            fileHelper.copyRecursive(sourceFolder, targetFolder, getLog());
+                            new FileHelper().copyRecursive(sourceFolder, targetFolder, getLog());
                         } catch(IOException e){
                             getLog().warn("Couldn't copy additional application resource-file(s).", e);
                         }
@@ -372,13 +254,13 @@ public class JarMojo extends AbstractJfxToolsMojo {
             libDir.delete();
         }
 
-        if( attachAsZippedArtifact ){
+        if( jfxJarSettings.isAttachAsZippedArtifact() ){
             // create ZIPPED version first
             File zipFileTarget = new File(build.getDirectory() + File.separator + build.getFinalName() + "-jfx-app.zip");
             try{
-                new FileHelper().pack(jfxAppOutputDir.toPath(), zipFileTarget.toPath());
+                new FileHelper().pack(jfxJarSettings.getOutputFolderName().toPath(), zipFileTarget.toPath());
                 // attach to project artifacts
-                projectHelper.attachArtifact(project, "zip", "jfx-app", zipFileTarget);
+                mavenSettings.getProjectHelper().attachArtifact(mavenSettings.getProject(), "zip", "jfx-app", zipFileTarget);
             } catch(IOException ex){
                 // TODO handle
                 Logger.getLogger(JarMojo.class.getName()).log(Level.SEVERE, null, ex);
@@ -397,12 +279,12 @@ public class JarMojo extends AbstractJfxToolsMojo {
     }
 
     protected boolean isListedInExclusionList(Artifact artifact) {
-        return classpathExcludes.stream().filter(dependency -> {
+        return jfxJarSettings.getClasspathExcludes().stream().filter(dependency -> {
             // we are checking for "groupID:artifactId:" because we don't care about versions nor types (jar, war, source, ...)
             String dependencyTrailIdentifier = dependency.getGroupId() + ":" + dependency.getArtifactId() + ":";
 
             // when not transitive, look at the artifact information
-            if( !classpathExcludesTransient ){
+            if( !jfxJarSettings.isClasspathExcludesTransient() ){
                 return dependencyTrailIdentifier.startsWith(artifact.getGroupId() + ":" + artifact.getArtifactId() + ":");
             }
 

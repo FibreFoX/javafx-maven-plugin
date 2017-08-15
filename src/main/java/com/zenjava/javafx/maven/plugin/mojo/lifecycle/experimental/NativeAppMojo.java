@@ -15,11 +15,12 @@
  */
 package com.zenjava.javafx.maven.plugin.mojo.lifecycle.experimental;
 
+import org.apache.maven.plugins.annotations.Mojo;
+
 /**
  * EXPERIMENTAL
- *
- * @goal build-native-app
  */
+@Mojo(name = "build-native-app")
 public class NativeAppMojo {
 
 }

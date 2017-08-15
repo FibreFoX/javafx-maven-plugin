@@ -16,6 +16,8 @@
 package com.zenjava.javafx.maven.plugin.mojo.cli;
 
 import com.zenjava.javafx.maven.plugin.mojo.lifecycle.NativeMojo;
+import org.apache.maven.plugins.annotations.Execute;
+import org.apache.maven.plugins.annotations.Mojo;
 
 /**
  * Generates native deployment bundles (MSI, EXE, DMG, RPG, etc). This Mojo simply wraps the JavaFX packaging tools
@@ -26,10 +28,13 @@ import com.zenjava.javafx.maven.plugin.mojo.lifecycle.NativeMojo;
  * <p>
  * For detailed information on generating native packages it is best to first read through the official documentation
  * on the JavaFX packaging tools.
- *
- * @goal native
- * @execute goal="jar"
  */
+@Mojo(
+        name = "native"
+)
+@Execute(
+        goal = "jar"
+)
 public class CliNativeMojo extends NativeMojo {
     // NO-OP
 }

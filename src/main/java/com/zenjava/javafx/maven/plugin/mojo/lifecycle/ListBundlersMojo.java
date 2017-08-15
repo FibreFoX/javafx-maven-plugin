@@ -26,12 +26,9 @@ import java.util.Optional;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
 
-/**
- *
- * @author Danny Althoff
- * @goal list-bundlers
- */
+@Mojo(name = "list-bundlers")
 public class ListBundlersMojo extends AbstractMojo {
 
     @Override

@@ -16,12 +16,14 @@
 package com.zenjava.javafx.maven.plugin.mojo.cli.experimental;
 
 import com.zenjava.javafx.maven.plugin.mojo.lifecycle.experimental.JnlpMojo;
+import org.apache.maven.plugins.annotations.Mojo;
 
 /**
  * EXPERIMENTAL
- *
- * @goal jnlp
  */
+@Mojo(
+        name = "jnlp"
+)
 public class CliJnlpMojo extends JnlpMojo {
 
 }

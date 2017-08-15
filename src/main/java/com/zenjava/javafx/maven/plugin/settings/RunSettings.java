@@ -15,6 +15,8 @@
  */
 package com.zenjava.javafx.maven.plugin.settings;
 
+import org.apache.maven.plugins.annotations.Parameter;
+
 /**
  *
  * @author FibreFoX
@@ -26,9 +28,8 @@ public class RunSettings {
      * tools exists, that need to be injected into the JVM via special parameter
      * (e.g. javassist). To have this being part of the command used to start the
      * application by this MOJO, just set all your parameters here.
-     *
-     * @parameter property="jfx.runSettings.javaParameter"
      */
+    @Parameter(property = "jfx.runSettings.javaParameter")
     protected String javaParameter = null;
 
     /**
@@ -39,8 +40,8 @@ public class RunSettings {
      * This fixes issue #176.
      *
      * @see https://github.com/javafx-maven-plugin/javafx-maven-plugin/issues/176
-     * @parameter property="jfx.runSettings.appParameter"
      */
+    @Parameter(property = "jfx.runSettings.appParameter")
     protected String appParameter = null;
 
     /**
@@ -50,9 +51,8 @@ public class RunSettings {
      * please set this to false. You might need this in the case you installed multiple versions of Java.
      *
      * The default is to use environment relative executables.
-     *
-     * @parameter property="jfx.runSettings.useEnvironmentRelativeExecutables" default-value="true"
      */
+    @Parameter(property = "jfx.runSettings.useEnvironmentRelativeExecutables", defaultValue = "true")
     protected boolean useEnvironmentRelativeExecutables;
 
     public String getJavaParameter() {

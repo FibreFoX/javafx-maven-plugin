@@ -16,13 +16,15 @@
 package com.zenjava.javafx.maven.plugin.mojo.cli;
 
 import com.zenjava.javafx.maven.plugin.mojo.lifecycle.GenerateKeyStoreMojo;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 
-/**
- *
- * @goal generate-key-store
- * @phase validate
- * @requiresDependencyResolution
- */
+@Mojo(
+        name = "generate-key-store",
+        requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME,
+        defaultPhase = LifecyclePhase.VALIDATE
+)
 public class CliGenerateKeyStoreMojo extends GenerateKeyStoreMojo {
 
 }

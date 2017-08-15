@@ -15,58 +15,44 @@
  */
 package com.zenjava.javafx.maven.plugin.mojo.cli;
 
-import com.zenjava.javafx.maven.plugin.AbstractJfxToolsMojo;
+import com.zenjava.javafx.maven.plugin.AbstractJfxMojo;
+import com.zenjava.javafx.maven.plugin.settings.JfxJarSettings;
 import com.zenjava.javafx.maven.plugin.settings.RunSettings;
 import com.zenjava.javafx.maven.plugin.workers.RunWorker;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Execute;
+import org.apache.maven.plugins.annotations.Mojo;
 
-/**
- *
- * @goal run
- * @execute goal="jar"
- */
-public class RunMojo extends AbstractJfxToolsMojo {
-
-    /**
-     * This got moved to jfx.runSettings.javaParameter
-     *
-     * @deprecated
-     * @parameter property="jfx.runJavaParameter"
-     */
-    @Deprecated
-    protected String runJavaParameter = null;
-
-    /**
-     * This got moved to jfx.runSettings.appParameter
-     *
-     * @deprecated
-     * @parameter property="jfx.runAppParameter"
-     */
-    @Deprecated
-    protected String runAppParameter = null;
+@Mojo(
+        name = "run"
+)
+@Execute(
+        goal = "jar"
+)
+public class RunMojo extends AbstractJfxMojo {
 
     /**
      * @parameter
      */
     protected RunSettings runSettings = null;
 
+    /**
+     * @parameter
+     */
+    protected JfxJarSettings jfxJarSettings = null;
+
     protected RunWorker runWorker = new RunWorker();
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        if( skip ){
+        if( baseSettings.isSkip() ){
             getLog().info("Skipping execution of RunMojo MOJO.");
             return;
         }
 
-        // propagate old parameters to new settings object
-        if( runSettings == null ){
-            runSettings = new RunSettings();
-            runSettings.setAppParameter(runAppParameter);
-            runSettings.setJavaParameter(runJavaParameter);
-        }
-
-        runWorker.execute(runSettings);
+        runWorker.execute(baseSettings, jfxJarSettings, runSettings, (message) -> {
+            getLog().info(message);
+        });
     }
 }

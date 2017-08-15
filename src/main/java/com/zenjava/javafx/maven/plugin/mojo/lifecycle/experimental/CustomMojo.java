@@ -15,11 +15,20 @@
  */
 package com.zenjava.javafx.maven.plugin.mojo.lifecycle.experimental;
 
+import com.zenjava.javafx.maven.plugin.AbstractJfxMojo;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.Mojo;
+
 /**
  * EXPERIMENTAL
- *
- * @goal build-custom
  */
-public class CustomMojo {
+@Mojo(name = "build-custom")
+public class CustomMojo extends AbstractJfxMojo {
+
+    @Override
+    public void execute() throws MojoExecutionException, MojoFailureException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 
 }

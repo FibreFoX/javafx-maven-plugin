@@ -15,10 +15,31 @@
  */
 package com.zenjava.javafx.maven.plugin.settings;
 
+import org.apache.maven.plugins.annotations.Parameter;
+
 /**
  *
  * @author FibreFoX
  */
 public class NativeAppSettings {
+
+    /**
+     * All commands executed by this Maven-plugin will be done using the current available commands
+     * of your maven-execution environment. It is possible to call Maven with a different version of Java,
+     * so these calls might be wrong. To use the executables of the JDK used for running this maven-plugin,
+     * please set this to false. You might need this in the case you installed multiple versions of Java.
+     *
+     * The default is to use environment relative executables.
+     */
+    @Parameter(property = "jfx.nativeAppSettings.useEnvironmentRelativeExecutables", defaultValue = "true")
+    protected boolean useEnvironmentRelativeExecutables;
+
+    public boolean isUseEnvironmentRelativeExecutables() {
+        return useEnvironmentRelativeExecutables;
+    }
+
+    public void setUseEnvironmentRelativeExecutables(boolean useEnvironmentRelativeExecutables) {
+        this.useEnvironmentRelativeExecutables = useEnvironmentRelativeExecutables;
+    }
 
 }

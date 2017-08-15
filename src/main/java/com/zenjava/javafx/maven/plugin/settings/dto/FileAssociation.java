@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.zenjava.javafx.maven.plugin;
+package com.zenjava.javafx.maven.plugin.settings.dto;
 
 import java.io.File;
+import org.apache.maven.plugins.annotations.Parameter;
 
 /**
  *
@@ -23,24 +24,16 @@ import java.io.File;
  */
 public class FileAssociation {
 
-    /**
-     * @parameter
-     */
+    @Parameter
     private String description = null;
 
-    /**
-     * @parameter
-     */
+    @Parameter
     private String extensions = null;
 
-    /**
-     * @parameter
-     */
+    @Parameter
     private String contentType = null;
 
-    /**
-     * @parameter
-     */
+    @Parameter
     private File icon = null;
 
     public String getDescription() {

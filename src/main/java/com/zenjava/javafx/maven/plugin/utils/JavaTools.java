@@ -16,6 +16,11 @@
 package com.zenjava.javafx.maven.plugin.utils;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 
 /**
  * @author Danny Althoff
@@ -59,5 +64,21 @@ public class JavaTools {
             return jrePath + File.separator + "bin" + File.separator;
         }
         return jrePath + File.separator + ".." + File.separator + "bin" + File.separator;
+    }
+
+    public static void addFolderToClassloader(String folderLocation) throws Exception {
+        if( folderLocation == null || folderLocation.trim().isEmpty() ){
+            return;
+        }
+
+        URLClassLoader sysloader = (URLClassLoader) Thread.currentThread().getContextClassLoader();
+        Class<URLClassLoader> sysclass = URLClassLoader.class;
+        try{
+            Method method = sysclass.getDeclaredMethod("addURL", URL.class);
+            method.setAccessible(true);
+            method.invoke(sysloader, new File(folderLocation).toURI().toURL());
+        } catch(NoSuchMethodException | SecurityException | MalformedURLException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex){
+            throw new Exception("Error, could not add URL to system classloader", ex);
+        }
     }
 }

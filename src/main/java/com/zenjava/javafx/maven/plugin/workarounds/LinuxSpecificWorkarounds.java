@@ -18,7 +18,7 @@ package com.zenjava.javafx.maven.plugin.workarounds;
 import com.oracle.tools.packager.IOUtils;
 import com.oracle.tools.packager.RelativeFileSet;
 import com.oracle.tools.packager.StandardBundlerParam;
-import com.zenjava.javafx.maven.plugin.NativeLauncher;
+import com.zenjava.javafx.maven.plugin.settings.dto.NativeLauncher;
 import com.zenjava.javafx.maven.plugin.utils.JavaTools;
 import java.io.File;
 import java.io.IOException;

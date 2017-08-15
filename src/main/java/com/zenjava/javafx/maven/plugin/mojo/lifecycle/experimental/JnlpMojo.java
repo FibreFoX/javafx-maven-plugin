@@ -15,11 +15,12 @@
  */
 package com.zenjava.javafx.maven.plugin.mojo.lifecycle.experimental;
 
+import org.apache.maven.plugins.annotations.Mojo;
+
 /**
  * EXPERIMENTAL
- *
- * @goal build-jnlp
  */
+@Mojo(name = "build-jnlp")
 public class JnlpMojo {
 
 }

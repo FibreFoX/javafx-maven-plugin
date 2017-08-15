@@ -8,7 +8,7 @@
 JavaFX Maven Plugin
 ===================
 
-The JavaFX Maven Plugin provides a way to assemble distribution bundles for JavaFX applications (8+) from within Maven.
+The JavaFX Maven Plugin provides a way to assemble distribution bundles for JavaFX applications (Java 8 and Java 9) from within Maven.
  
 For easy configuration please use our new website (which needs to get updated/reworked again):
 **[http://javafx-maven-plugin.github.io](http://javafx-maven-plugin.github.io)**
@@ -27,9 +27,11 @@ Add this to your pom.xml within to your build-plugin:
 <plugin>
     <groupId>com.zenjava</groupId>
     <artifactId>javafx-maven-plugin</artifactId>
-    <version>8.8.3</version>
+    <version>9.0.0</version>
     <configuration>
-        <mainClass>your.package.with.Launcher</mainClass>
+        <jfxJarSettings>
+            <mainClass>your.package.with.Launcher</mainClass>
+        <jfxJarSettings>
     </configuration>
 </plugin>
 ```
@@ -47,15 +49,19 @@ Add this to your pom.xml within to your build-plugin:
 <plugin>
     <groupId>com.zenjava</groupId>
     <artifactId>javafx-maven-plugin</artifactId>
-    <version>8.8.3</version>
+    <version>9.0.0</version>
     <configuration>
-        <vendor>YourCompany</vendor>
-        <mainClass>your.package.with.Launcher</mainClass>
+        <jfxJarSettings>
+            <mainClass>your.package.with.Launcher</mainClass>
+        <jfxJarSettings>
+        <nativeInstallerSettings>
+            <vendor>YourCompany</vendor>
+        </nativeInstallerSettings>
     </configuration>
 </plugin>
 ```
 
-To create your executable file with JavaFX-magic and some installers (please see official oracle-documentation which applications are required for this), call `mvn jfx:native`. The native launchers or installers will be placed at `target/jfx/native`.
+To create your executable file with JavaFX-magic and some installers (please see official oracle-documentation which applications are required for this), call `mvn jfx:native-app` to just create the native app, or call `mvn jfx:native-installer` for creating both. The native launchers or installers will be placed at `target/jfx/native`.
 
 
 Using `SNAPSHOT`-versions
@@ -75,41 +81,18 @@ When you report a bug and this got worked around, you might be able to have acce
 ```
 
 
-Prepared for Java 9
-===================
-
-**This is currently heavily outdated**
-
-Add repository in your `pom.xml` for snapshot-versions of this plugin (see above) and set version to new SNAPSHOT-version:
-
-```xml
-<plugin>
-    <groupId>com.zenjava</groupId>
-    <artifactId>javafx-maven-plugin</artifactId>
-    <version>9.0.0-SNAPSHOT</version>
-    <configuration>
-        <!-- your configuration -->
-    </configuration>
-</plugin>
-```
-
-*Some notes: as this isn't the main branch, a lot of features aren't present in that branch yet, deployment of new "-SNAPSHOT"-version are on-demand*
-**This is currently heavily outdated**
-
-
-
 Last Release Notes
 ==================
 
-**Version 8.8.3 (09-feb-2017)**
+**Version 9.0.0 (???-2017)**
 
-Bugfixes:
-* fixed `<launcherArguments>` of secondary launchers not being set correctly ([reported at the javafx-gradle-plugin](https://github.com/FibreFoX/javafx-gradle-plugin/issues/55))
+New:
+* complete new configuration interface
 
 
 (Not yet) Release(d) Notes
 ==========================
 
-upcoming Version 8.8.4 (???-2017)
+upcoming Version 9.0.1 (???-2017)
 
 *nothing changed yet*

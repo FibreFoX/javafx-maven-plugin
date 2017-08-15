@@ -21,7 +21,7 @@
 
     <groupId>com.zenjava</groupId>
     <artifactId>javafx-maven-plugin</artifactId>
-    <version>8.9.0-SNAPSHOT</version>
+    <version>9.0.0-SNAPSHOT</version>
 
     <packaging>maven-plugin</packaging>
 
@@ -197,7 +197,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>2.15</version>
+                <version>2.17</version>
                 <executions>
                     <execution>
                         <id>validate</id>
@@ -220,7 +220,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.6.1</version>
+                <version>3.6.2</version>
                 <configuration>
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
@@ -255,7 +255,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>1.4.1</version>
+                <version>3.0.0-M1</version>
                 <executions>
                     <execution>
                         <id>enforce-versions</id>
@@ -276,7 +276,7 @@
             <!-- integration-testing via own projects -->
             <plugin>
                 <artifactId>maven-invoker-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>3.0.1</version>
                 <configuration>
                     <projectsDirectory>src/it</projectsDirectory>
                     <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
@@ -293,6 +293,16 @@
                         <goals>
                             <goal>run</goal>
                         </goals>
+                    </execution>
+                    <execution>
+                        <id>invoker-tests-with-properties</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <projectsDirectory>src/it/with_properties</projectsDirectory>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -317,14 +327,12 @@
             <artifactId>maven-plugin-api</artifactId>
             <version>3.5.0</version>
         </dependency>
-        <!--
         <dependency>
             <groupId>org.apache.maven.plugin-tools</groupId>
-            <artifactId>maven-plugin-tools-annotations</artifactId>
+            <artifactId>maven-plugin-annotations</artifactId>
             <version>3.5</version>
             <scope>provided</scope>
         </dependency>
-        -->
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-core</artifactId>

@@ -16,6 +16,10 @@
 package com.zenjava.javafx.maven.plugin.mojo.cli;
 
 import com.zenjava.javafx.maven.plugin.mojo.lifecycle.JarMojo;
+import org.apache.maven.plugins.annotations.Execute;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * Builds an executable JAR for the project that has all the trappings needed to run as a JavaFX app. This will
@@ -29,11 +33,18 @@ import com.zenjava.javafx.maven.plugin.mojo.lifecycle.JarMojo;
  * The JAR and the 'lib' directory built by this Mojo are used as the inputs to the other distribution bundles. The
  * native and web Mojos for example, will trigger this Mojo first and then will copy the resulting JAR into their own
  * distribution bundles.
- *
- * @goal jar
- * @execute lifecycle="jfxjar" phase="package"
- * @requiresDependencyResolution
  */
+@Mojo(
+        name = "jar",
+        requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME,
+        defaultPhase = LifecyclePhase.PACKAGE
+)
+// when calling "mvn jfx:jar", we have to make sure to call "mvn jar:jar" too, as we require the jar-file
+@Execute(
+        goal = "jar",
+        lifecycle = "jfxjar",
+        phase = LifecyclePhase.PACKAGE
+)
 public class CliJarMojo extends JarMojo {
     // NO-OP
 }

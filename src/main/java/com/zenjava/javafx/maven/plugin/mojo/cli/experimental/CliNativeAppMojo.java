@@ -16,12 +16,14 @@
 package com.zenjava.javafx.maven.plugin.mojo.cli.experimental;
 
 import com.zenjava.javafx.maven.plugin.mojo.lifecycle.experimental.NativeAppMojo;
+import org.apache.maven.plugins.annotations.Mojo;
 
 /**
  * EXPERIMENTAL
- *
- * @goal native-app
  */
+@Mojo(
+        name = "native-app"
+)
 public class CliNativeAppMojo extends NativeAppMojo{
 
 }

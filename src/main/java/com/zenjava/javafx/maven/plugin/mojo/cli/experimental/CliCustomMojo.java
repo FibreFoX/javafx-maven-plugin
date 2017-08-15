@@ -16,12 +16,14 @@
 package com.zenjava.javafx.maven.plugin.mojo.cli.experimental;
 
 import com.zenjava.javafx.maven.plugin.mojo.lifecycle.experimental.CustomMojo;
+import org.apache.maven.plugins.annotations.Mojo;
 
 /**
  * EXPERIMENTAL
- *
- * @goal custom-bundler
  */
-public class CliCustomMojo extends CustomMojo{
+@Mojo(
+        name = "custom-bundler"
+)
+public class CliCustomMojo extends CustomMojo {
 
 }

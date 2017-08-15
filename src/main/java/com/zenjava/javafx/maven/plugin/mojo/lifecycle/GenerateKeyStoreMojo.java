@@ -27,6 +27,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
 /**
@@ -39,11 +42,12 @@ import org.apache.maven.project.MavenProject;
  * keystore will result in your users seeing the ugly warning about untrusted code.
  * <p>
  * Please do not use for production.
- *
- * @goal build-keystore
- * @phase validate
- * @requiresDependencyResolution
  */
+@Mojo(
+        name = "build-keystore",
+        requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME,
+        defaultPhase = LifecyclePhase.VALIDATE
+)
 public class GenerateKeyStoreMojo extends AbstractMojo {
 
     /**
