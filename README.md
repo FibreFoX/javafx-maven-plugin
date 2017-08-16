@@ -1,7 +1,7 @@
 [![Travis Build Status](https://travis-ci.org/javafx-maven-plugin/javafx-maven-plugin.svg?branch=master)](https://travis-ci.org/javafx-maven-plugin/javafx-maven-plugin)
 [![AppVeyor Build status](https://ci.appveyor.com/api/projects/status/64700ul3m9y88agi/branch/master?svg=true)](https://ci.appveyor.com/project/FibreFoX/javafx-maven-plugin/branch/master)
 [![Maven Central](https://img.shields.io/maven-central/v/com.zenjava/javafx-maven-plugin.svg)](https://maven-badges.herokuapp.com/maven-central/com.zenjava/javafx-maven-plugin)
-[![Dependency Status](https://www.versioneye.com/java/com.zenjava:javafx-maven-plugin/8.8.3/badge.svg)](https://www.versioneye.com/java/com.zenjava:javafx-maven-plugin/8.8.3)
+[![Dependency Status](https://www.versioneye.com/java/com.zenjava:javafx-maven-plugin/9.0.0/badge.svg)](https://www.versioneye.com/java/com.zenjava:javafx-maven-plugin/9.0.0)
 
 
 
@@ -10,12 +10,6 @@ JavaFX Maven Plugin
 
 The JavaFX Maven Plugin provides a way to assemble distribution bundles for JavaFX applications (Java 8 and Java 9) from within Maven.
  
-For easy configuration please use our new website (which needs to get updated/reworked again):
-**[http://javafx-maven-plugin.github.io](http://javafx-maven-plugin.github.io)**
-
-For (outdated) documentation/examples, your can look at archived website:
-**[https://web.archive.org/web/20141009064442/http://zenjava.com/javafx/maven/](https://web.archive.org/web/20141009064442/http://zenjava.com/javafx/maven/)**
-
 
 
 Quickstart for JavaFX JAR
