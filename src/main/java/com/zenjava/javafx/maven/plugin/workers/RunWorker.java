@@ -33,7 +33,7 @@ import org.apache.maven.plugin.MojoExecutionException;
 public class RunWorker {
 
     public void execute(BaseSettings baseSettings, JfxJarSettings jfxJarSettings, RunSettings runSettings, LoggerCall infoLogger) throws MojoExecutionException {
-        infoLogger.log("Running JavaFX Application");
+        infoLogger.log("Running JavaFX application from JAR-file");
 
         List<String> command = new ArrayList<>();
         command.add(JavaTools.getExecutablePath(runSettings.isUseEnvironmentRelativeExecutables()) + "java");

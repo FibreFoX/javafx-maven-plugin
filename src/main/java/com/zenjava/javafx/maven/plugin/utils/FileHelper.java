@@ -54,7 +54,7 @@ public class FileHelper {
         }
     }
 
-    public void copyRecursive(Path sourceFolder, Path targetFolder, Log logger) throws IOException {
+    public void copyRecursive(Path sourceFolder, Path targetFolder, LoggerCall warnLogger) throws IOException {
         Files.walkFileTree(sourceFolder, new FileVisitor<Path>() {
 
             @Override
@@ -74,7 +74,7 @@ public class FileHelper {
             @Override
             public FileVisitResult visitFileFailed(Path source, IOException ioe) throws IOException {
                 // don't fail, just inform user
-                logger.warn(String.format("Couldn't copy resource %s with reason %s", source.toString(), ioe.getLocalizedMessage()));
+                warnLogger.log(String.format("Couldn't copy resource %s with reason %s", source.toString(), ioe.getLocalizedMessage()));
                 return FileVisitResult.CONTINUE;
             }
 
