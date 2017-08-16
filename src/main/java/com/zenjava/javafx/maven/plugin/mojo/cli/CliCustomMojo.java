@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.zenjava.javafx.maven.plugin.mojo.cli.experimental;
+package com.zenjava.javafx.maven.plugin.mojo.cli;
 
-import com.zenjava.javafx.maven.plugin.mojo.lifecycle.experimental.NativeAppMojo;
+import com.zenjava.javafx.maven.plugin.mojo.lifecycle.CustomMojo;
 import org.apache.maven.plugins.annotations.Mojo;
 
 /**
  * EXPERIMENTAL
  */
 @Mojo(
-        name = "native-app"
+        name = "custom-bundler"
 )
-public class CliNativeAppMojo extends NativeAppMojo{
+public class CliCustomMojo extends CustomMojo {
 
 }

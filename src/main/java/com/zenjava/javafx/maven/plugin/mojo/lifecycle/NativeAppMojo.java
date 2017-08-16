@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.zenjava.javafx.maven.plugin.mojo.lifecycle.experimental;
+package com.zenjava.javafx.maven.plugin.mojo.lifecycle;
 
 import org.apache.maven.plugins.annotations.Mojo;
 
 /**
  * EXPERIMENTAL
  */
-@Mojo(name = "build-native-installer")
-public class NativeInstallerMojo {
+@Mojo(name = "build-native-app")
+public class NativeAppMojo {
 
 }

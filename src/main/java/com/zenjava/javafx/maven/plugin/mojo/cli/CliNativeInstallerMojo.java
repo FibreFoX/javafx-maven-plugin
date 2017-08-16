@@ -13,22 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.zenjava.javafx.maven.plugin.mojo.lifecycle.experimental;
+package com.zenjava.javafx.maven.plugin.mojo.cli;
 
-import com.zenjava.javafx.maven.plugin.AbstractJfxMojo;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
+import com.zenjava.javafx.maven.plugin.mojo.lifecycle.NativeInstallerMojo;
 import org.apache.maven.plugins.annotations.Mojo;
 
 /**
  * EXPERIMENTAL
  */
-@Mojo(name = "build-custom")
-public class CustomMojo extends AbstractJfxMojo {
-
-    @Override
-    public void execute() throws MojoExecutionException, MojoFailureException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+@Mojo(
+        name = "native-installer"
+)
+public class CliNativeInstallerMojo extends NativeInstallerMojo {
 
 }
