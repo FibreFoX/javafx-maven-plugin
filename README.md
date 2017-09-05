@@ -9,6 +9,24 @@ JavaFX Maven Plugin
 ===================
 
 The JavaFX Maven Plugin provides a way to assemble distribution bundles for JavaFX applications (Java 8 and Java 9) from within Maven.
+
+
+
+Requirements
+============
+* Maven 3.5 (might work with previous Maven 3.x versions)
+* Java Developer Kit 8 with at least Update 40
+
+
+
+OS-specific requirements
+========================
+* (Windows) EXE installers: Inno Setup
+* (Windows) MSI installers: WiX (at least version 3.7)
+* (Linux) DEB installers: dpkg-deb
+* (Linux) RPM installers: rpmbuild
+* (Mac) DMG installers: hdiutil
+* (Mac) PKG installers: pkgbuild
  
 
 
