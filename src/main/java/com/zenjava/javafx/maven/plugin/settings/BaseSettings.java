@@ -25,12 +25,6 @@ import org.apache.maven.plugins.annotations.Parameter;
 public class BaseSettings {
 
     /**
-     * Set this to true for skipping the execution.
-     */
-    @Parameter(name = "skip", property = "jfx.baseSettings.skip", defaultValue = "false")
-    protected boolean skip = false;
-
-    /**
      * Flag to turn off verbose logging. Set this to true if you are having problems and want more detailed information.
      *
      */
@@ -76,14 +70,6 @@ public class BaseSettings {
      */
     @Parameter(property = "jfx.baseSettings.failOnError", defaultValue = "false")
     protected boolean failOnError = false;
-
-    public boolean isSkip() {
-        return skip;
-    }
-
-    public void setSkip(boolean skip) {
-        this.skip = skip;
-    }
 
     public Boolean isVerbose() {
         return verbose;

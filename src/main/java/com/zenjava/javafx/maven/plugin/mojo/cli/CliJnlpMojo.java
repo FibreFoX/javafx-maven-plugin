@@ -22,7 +22,8 @@ import org.apache.maven.plugins.annotations.Mojo;
  * EXPERIMENTAL
  */
 @Mojo(
-        name = "jnlp"
+        name = "jnlp",
+        requiresDirectInvocation = true
 )
 public class CliJnlpMojo extends JnlpMojo {
 

@@ -18,6 +18,7 @@ package com.zenjava.javafx.maven.plugin.mojo.cli;
 import com.zenjava.javafx.maven.plugin.AbstractJfxMojo;
 import com.zenjava.javafx.maven.plugin.settings.JfxJarSettings;
 import com.zenjava.javafx.maven.plugin.settings.RunSettings;
+import com.zenjava.javafx.maven.plugin.utils.BuildLogger;
 import com.zenjava.javafx.maven.plugin.workers.RunWorker;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -25,7 +26,8 @@ import org.apache.maven.plugins.annotations.Execute;
 import org.apache.maven.plugins.annotations.Mojo;
 
 @Mojo(
-        name = "run"
+        name = "run",
+        requiresDirectInvocation = true
 )
 @Execute(
         goal = "jar"
@@ -46,13 +48,16 @@ public class RunMojo extends AbstractJfxMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        if( baseSettings.isSkip() ){
-            getLog().info("Skipping execution of RunMojo MOJO.");
+        if( skip ){
+            getLog().info("Skipping execution of RunMojo");
             return;
         }
 
-        runWorker.execute(baseSettings, jfxJarSettings, runSettings, (message) -> {
-            getLog().info(message);
+        runWorker.execute(baseSettings, jfxJarSettings, runSettings, new BuildLogger() {
+            @Override
+            public void info(String message) {
+                getLog().info(message);
+            }
         });
     }
 }

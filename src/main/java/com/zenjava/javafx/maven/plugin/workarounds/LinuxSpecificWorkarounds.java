@@ -19,6 +19,7 @@ import com.oracle.tools.packager.IOUtils;
 import com.oracle.tools.packager.RelativeFileSet;
 import com.oracle.tools.packager.StandardBundlerParam;
 import com.zenjava.javafx.maven.plugin.settings.dto.NativeLauncher;
+import com.zenjava.javafx.maven.plugin.utils.BuildLogger;
 import com.zenjava.javafx.maven.plugin.utils.JavaTools;
 import java.io.File;
 import java.io.IOException;
@@ -32,7 +33,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
-import org.apache.maven.plugin.logging.Log;
 
 /**
  *
@@ -45,15 +45,15 @@ public class LinuxSpecificWorkarounds {
     public static final String CFG_WORKAROUND_MARKER = "cfgWorkaroundMarker";
     public static final String CFG_WORKAROUND_DONE_MARKER = CFG_WORKAROUND_MARKER + ".done";
 
-    protected Log logger;
+    protected BuildLogger logger;
     protected File nativeOutputDir;
 
-    public LinuxSpecificWorkarounds(File nativeOutputDir, Log logger) {
+    public LinuxSpecificWorkarounds(File nativeOutputDir, BuildLogger logger) {
         this.logger = logger;
         this.nativeOutputDir = nativeOutputDir;
     }
 
-    protected Log getLog() {
+    protected BuildLogger getLog() {
         return logger;
     }
 

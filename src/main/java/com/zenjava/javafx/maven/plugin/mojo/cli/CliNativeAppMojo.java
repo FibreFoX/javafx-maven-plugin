@@ -22,8 +22,9 @@ import org.apache.maven.plugins.annotations.Mojo;
  * EXPERIMENTAL
  */
 @Mojo(
-        name = "native-app"
+        name = "native-app",
+        requiresDirectInvocation = true
 )
-public class CliNativeAppMojo extends NativeAppMojo{
+public class CliNativeAppMojo extends NativeAppMojo {
 
 }

@@ -30,7 +30,8 @@ import org.apache.maven.plugins.annotations.Mojo;
  * on the JavaFX packaging tools.
  */
 @Mojo(
-        name = "native"
+        name = "native",
+        requiresDirectInvocation = true
 )
 @Execute(
         goal = "jar"

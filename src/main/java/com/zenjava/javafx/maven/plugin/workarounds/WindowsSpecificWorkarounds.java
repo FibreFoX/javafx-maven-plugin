@@ -15,8 +15,8 @@
  */
 package com.zenjava.javafx.maven.plugin.workarounds;
 
+import com.zenjava.javafx.maven.plugin.utils.BuildLogger;
 import java.io.File;
-import org.apache.maven.plugin.logging.Log;
 
 /**
  *
@@ -24,15 +24,15 @@ import org.apache.maven.plugin.logging.Log;
  */
 public class WindowsSpecificWorkarounds {
 
-    protected Log logger;
+    protected BuildLogger logger;
     protected File nativeOutputDir;
 
-    public WindowsSpecificWorkarounds(File nativeOutputDir, Log logger) {
+    public WindowsSpecificWorkarounds(File nativeOutputDir, BuildLogger logger) {
         this.logger = logger;
         this.nativeOutputDir = nativeOutputDir;
     }
 
-    protected Log getLog() {
+    protected BuildLogger getLog() {
         return logger;
     }
 

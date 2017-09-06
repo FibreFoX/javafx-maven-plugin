@@ -9,7 +9,7 @@ import org.apache.maven.project.MavenProjectHelper;
  *
  * @author FibreFoX
  */
-public class MavenSettings {
+public class BuildToolSettings {
 
     /**
      * The Maven Project Object

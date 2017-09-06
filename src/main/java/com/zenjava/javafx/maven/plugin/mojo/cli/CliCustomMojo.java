@@ -22,7 +22,8 @@ import org.apache.maven.plugins.annotations.Mojo;
  * EXPERIMENTAL
  */
 @Mojo(
-        name = "custom-bundler"
+        name = "custom-bundler",
+        requiresDirectInvocation = true
 )
 public class CliCustomMojo extends CustomMojo {
 

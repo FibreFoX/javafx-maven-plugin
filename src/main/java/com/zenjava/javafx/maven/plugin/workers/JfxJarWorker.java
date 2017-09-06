@@ -21,10 +21,10 @@ import com.sun.javafx.tools.packager.PackagerLib;
 import com.zenjava.javafx.maven.plugin.mojo.lifecycle.JarMojo;
 import com.zenjava.javafx.maven.plugin.settings.BaseSettings;
 import com.zenjava.javafx.maven.plugin.settings.JfxJarSettings;
-import com.zenjava.javafx.maven.plugin.settings.MavenSettings;
+import com.zenjava.javafx.maven.plugin.settings.BuildToolSettings;
+import com.zenjava.javafx.maven.plugin.utils.BuildLogger;
 import com.zenjava.javafx.maven.plugin.utils.FileHelper;
 import com.zenjava.javafx.maven.plugin.utils.JavaTools;
-import com.zenjava.javafx.maven.plugin.utils.LoggerCall;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -48,12 +48,8 @@ import org.apache.maven.plugin.MojoExecutionException;
  */
 public class JfxJarWorker {
 
-    public void execute(BaseSettings baseSettings, MavenSettings mavenSettings, JfxJarSettings jfxJarSettings, LoggerCall infoLogger, LoggerCall warnLogger, LoggerCall errorLogger, LoggerCall debugLogger) throws MojoExecutionException {
-        if( baseSettings.isSkip() ){
-            infoLogger.log("Skipped generating JavaFX application as JAR");
-            return;
-        }
-        infoLogger.log("Generating JavaFX application as JAR");
+    public void execute(BaseSettings baseSettings, BuildToolSettings mavenSettings, JfxJarSettings jfxJarSettings, BuildLogger buildLogger) throws MojoExecutionException {
+        buildLogger.info("Generating JavaFX application as JAR");
 
         Build build = mavenSettings.getProject().getBuild();
 
@@ -62,7 +58,7 @@ public class JfxJarWorker {
 
         // check if we got some filename ending with ".jar" (found this while checking issue 128)
         if( !jfxJarSettings.getJfxMainAppJarName().toLowerCase().endsWith(".jar") ){
-            errorLogger.log("Please provide a proper value for <jfxMainAppJarName>! It has to end with \".jar\".");
+            buildLogger.error("Please provide a proper value for <jfxMainAppJarName>! It has to end with \".jar\".");
             return;
         }
 
@@ -83,6 +79,7 @@ public class JfxJarWorker {
         }
 
         if( jfxJarSettings.isUpdateExistingJar() ){
+            // TODO try to create a build-tool agnostic way
             File potentialExistingFile = new File(build.getDirectory() + File.separator + build.getFinalName() + ".jar");
             if( !potentialExistingFile.exists() ){
                 throw new MojoExecutionException("Could not update existing jar-file, because it does not exist. Please make sure this file gets created or exists, or set updateExistingJar to false.");
@@ -92,7 +89,7 @@ public class JfxJarWorker {
             File potentialExistingGeneratedClasses = new File(build.getOutputDirectory());
             // make sure folder exists, it is possible to have just some bootstraping "-jfx.jar"
             if( !potentialExistingGeneratedClasses.exists() ){
-                warnLogger.log("There were no classes build, this might be a problem of your project, if its not, just ignore this message. Continuing creating JavaFX JAR...");
+                buildLogger.warn("There were no classes build, this might be a problem of your project, if its not, just ignore this message. Continuing creating JavaFX JAR...");
                 potentialExistingGeneratedClasses.mkdirs();
             }
             createJarParams.addResource(potentialExistingGeneratedClasses, "");
@@ -100,9 +97,10 @@ public class JfxJarWorker {
 
         try{
             if( checkIfJavaIsHavingPackagerJar() ){
-                debugLogger.log("Check if packager.jar needs to be added");
+                buildLogger.debug("Check if packager.jar needs to be added");
                 if( jfxJarSettings.isAddPackagerJar() && !jfxJarSettings.isSkipCopyingDependencies() ){
-                    debugLogger.log("Searching for packager.jar ...");
+                    buildLogger.debug("Searching for packager.jar ...");
+                    // TODO try to create a build-tool agnostic way
                     String targetPackagerJarPath = jfxJarSettings.getLibFolderName() + File.separator + "packager.jar";
                     for( Dependency dependency : mavenSettings.getProject().getDependencies() ){
                         // check only system-scoped
@@ -110,7 +108,7 @@ public class JfxJarWorker {
                             File packagerJarFile = new File(dependency.getSystemPath());
                             String packagerJarFilePathString = packagerJarFile.toPath().normalize().toString();
                             if( packagerJarFile.exists() && packagerJarFilePathString.endsWith(targetPackagerJarPath) ){
-                                debugLogger.log(String.format("Including packager.jar from system-scope: %s", packagerJarFilePathString));
+                                buildLogger.debug(String.format("Including packager.jar from system-scope: %s", packagerJarFilePathString));
                                 File dest = new File(libDir, packagerJarFile.getName());
                                 if( !dest.exists() ){
                                     Files.copy(packagerJarFile.toPath(), dest.toPath());
@@ -121,11 +119,11 @@ public class JfxJarWorker {
                         }
                     }
                 } else {
-                    debugLogger.log("No packager.jar will be added");
+                    buildLogger.debug("No packager.jar will be added");
                 }
             } else {
                 if( jfxJarSettings.isAddPackagerJar() ){
-                    warnLogger.log("Skipped checking for packager.jar. Please install at least Java 1.8u40 for using this feature.");
+                    buildLogger.warn("Skipped checking for packager.jar. Please install at least Java 1.8u40 for using this feature.");
                 }
             }
             List<String> brokenArtifacts = new ArrayList<>();
@@ -141,18 +139,18 @@ public class JfxJarWorker {
                 return !isListedInList;
             }).forEach(artifact -> {
                 File artifactFile = artifact.getFile();
-                debugLogger.log(String.format("Including classpath element: %s", artifactFile.getAbsolutePath()));
+                buildLogger.debug(String.format("Including classpath element: %s", artifactFile.getAbsolutePath()));
                 File dest = new File(libDir, artifactFile.getName());
                 if( !dest.exists() ){
                     try{
                         if( !jfxJarSettings.isSkipCopyingDependencies() ){
                             Files.copy(artifactFile.toPath(), dest.toPath());
                         } else {
-                            infoLogger.log(String.format("Skipped copying classpath element: %s", artifactFile.getAbsolutePath()));
+                            buildLogger.info(String.format("Skipped copying classpath element: %s", artifactFile.getAbsolutePath()));
                         }
                     } catch(IOException ex){
-                        warnLogger.log(String.format("Couldn't read from file %s", artifactFile.getAbsolutePath()));
-                        debugLogger.log(ex.toString());
+                        buildLogger.warn(String.format("Couldn't read from file %s", artifactFile.getAbsolutePath()));
+                        buildLogger.debug(ex.toString());
                         brokenArtifacts.add(artifactFile.getAbsolutePath());
                     }
                 }
@@ -176,8 +174,8 @@ public class JfxJarWorker {
                     }
                 });
             } catch(IOException ioex){
-                warnLogger.log("Got problem while scanning lib-folder");
-                debugLogger.log(ioex.toString());
+                buildLogger.warn("Got problem while scanning lib-folder");
+                buildLogger.debug(ioex.toString());
             }
             createJarParams.setClasspath(scannedClasspath.toString());
         } else {
@@ -191,7 +189,7 @@ public class JfxJarWorker {
             createJarParams.setClasspath(manifestClasspath);
 
             if( jfxJarSettings.isUseLibFolderContentForManifestClasspath() ){
-                warnLogger.log("You specified to use the content of the lib-folder AND specified a fixed classpath. The fixed classpath will get taken.");
+                buildLogger.warn("You specified to use the content of the lib-folder AND specified a fixed classpath. The fixed classpath will get taken.");
             }
         });
 
@@ -203,9 +201,7 @@ public class JfxJarWorker {
 
         try{
             JavaTools.addFolderToClassloader(baseSettings.getDeployDir());
-
             Log.setLogger(new Log.Logger(baseSettings.isVerbose()));
-
             new PackagerLib().packageAsJar(createJarParams);
         } catch(Exception e){
             throw new MojoExecutionException("Unable to build JFX JAR for application", e);
@@ -215,15 +211,15 @@ public class JfxJarWorker {
             Optional.ofNullable(jfxJarSettings.getAdditionalAppResources())
                     .filter(File::exists)
                     .ifPresent(appResources -> {
-                        infoLogger.log("Copying additional app ressources...");
+                        buildLogger.info("Copying additional app ressources...");
 
                         try{
                             Path targetFolder = jfxJarSettings.getOutputFolderName().toPath();
                             Path sourceFolder = appResources.toPath();
-                            new FileHelper().copyRecursive(sourceFolder, targetFolder, warnLogger);
+                            new FileHelper().copyRecursive(sourceFolder, targetFolder, buildLogger);
                         } catch(IOException e){
-                            warnLogger.log("Couldn't copy additional application resource-file(s).");
-                            debugLogger.log(e.toString());
+                            buildLogger.warn("Couldn't copy additional application resource-file(s).");
+                            buildLogger.debug(e.toString());
                         }
                     });
         }

@@ -15,6 +15,7 @@
  */
 package com.zenjava.javafx.maven.plugin.workarounds;
 
+import com.zenjava.javafx.maven.plugin.utils.BuildLogger;
 import com.zenjava.javafx.maven.plugin.utils.FileHelper;
 import com.zenjava.javafx.maven.plugin.utils.JavaTools;
 import java.io.File;
@@ -28,7 +29,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
-import org.apache.maven.plugin.logging.Log;
 
 /**
  *
@@ -39,15 +39,15 @@ public class GenericWorkarounds {
     protected static final String JNLP_JAR_PATTERN = "(.*)href=(\".*?\")(.*)size=(\".*?\")(.*)";
     protected FileHelper fileHelper = new FileHelper();
 
-    protected Log logger;
+    protected BuildLogger logger;
     protected File nativeOutputDir;
 
-    public GenericWorkarounds(File nativeOutputDir, Log logger) {
+    public GenericWorkarounds(File nativeOutputDir, BuildLogger logger) {
         this.logger = logger;
         this.nativeOutputDir = nativeOutputDir;
     }
 
-    protected Log getLog() {
+    protected BuildLogger getLog() {
         return logger;
     }
 

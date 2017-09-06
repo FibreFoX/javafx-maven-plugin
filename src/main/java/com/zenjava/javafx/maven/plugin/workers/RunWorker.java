@@ -18,8 +18,8 @@ package com.zenjava.javafx.maven.plugin.workers;
 import com.zenjava.javafx.maven.plugin.settings.BaseSettings;
 import com.zenjava.javafx.maven.plugin.settings.JfxJarSettings;
 import com.zenjava.javafx.maven.plugin.settings.RunSettings;
+import com.zenjava.javafx.maven.plugin.utils.BuildLogger;
 import com.zenjava.javafx.maven.plugin.utils.JavaTools;
-import com.zenjava.javafx.maven.plugin.utils.LoggerCall;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,8 +32,8 @@ import org.apache.maven.plugin.MojoExecutionException;
  */
 public class RunWorker {
 
-    public void execute(BaseSettings baseSettings, JfxJarSettings jfxJarSettings, RunSettings runSettings, LoggerCall infoLogger) throws MojoExecutionException {
-        infoLogger.log("Running JavaFX application from JAR-file");
+    public void execute(BaseSettings baseSettings, JfxJarSettings jfxJarSettings, RunSettings runSettings, BuildLogger buildLogger) throws MojoExecutionException {
+        buildLogger.info("Running JavaFX application from JAR-file");
 
         List<String> command = new ArrayList<>();
         command.add(JavaTools.getExecutablePath(runSettings.isUseEnvironmentRelativeExecutables()) + "java");
@@ -63,7 +63,7 @@ public class RunWorker {
                     .command(command);
 
             if( baseSettings.isVerbose() ){
-                infoLogger.log("Running command: " + String.join(" ", command));
+                buildLogger.info("Running command: " + String.join(" ", command));
             }
 
             Process p = pb.start();

@@ -16,12 +16,12 @@
 package com.zenjava.javafx.maven.plugin.workarounds;
 
 import com.oracle.tools.packager.Bundler;
+import com.zenjava.javafx.maven.plugin.utils.BuildLogger;
 import com.zenjava.javafx.maven.plugin.utils.MacAppBundlerWithAdditionalResources;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
-import org.apache.maven.plugin.logging.Log;
 
 /**
  *
@@ -29,13 +29,13 @@ import org.apache.maven.plugin.logging.Log;
  */
 public class MacSpecificWorkarounds {
 
-    protected Log logger;
+    protected BuildLogger logger;
 
-    public MacSpecificWorkarounds(File nativeOutputDir, Log logger) {
+    public MacSpecificWorkarounds(File nativeOutputDir, BuildLogger logger) {
         this.logger = logger;
     }
 
-    protected Log getLog() {
+    protected BuildLogger getLog() {
         return logger;
     }
 

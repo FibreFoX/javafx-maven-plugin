@@ -17,6 +17,7 @@ package com.zenjava.javafx.maven.plugin.mojo.lifecycle;
 
 import com.zenjava.javafx.maven.plugin.AbstractJfxMojo;
 import com.zenjava.javafx.maven.plugin.settings.JfxJarSettings;
+import com.zenjava.javafx.maven.plugin.utils.BuildLogger;
 import com.zenjava.javafx.maven.plugin.workers.JfxJarWorker;
 
 import org.apache.maven.plugin.MojoExecutionException;
@@ -51,14 +52,30 @@ public class JarMojo extends AbstractJfxMojo {
             getLog().info("call from CLI - skipping creation of JavaFX JAR for application");
             return;
         }
-        jfxJarWorker.execute(baseSettings, mavenSettings, jfxJarSettings, (message) -> {
-            getLog().info(message);
-        }, (message) -> {
-            getLog().warn(message);
-        }, (message) -> {
-            getLog().error(message);
-        }, (message) -> {
-            getLog().debug(message);
+        if( skip ){
+            getLog().info("Skipped generating JavaFX application as JAR");
+            return;
+        }
+        jfxJarWorker.execute(baseSettings, mavenSettings, jfxJarSettings, new BuildLogger() {
+            @Override
+            public void debug(String message) {
+                getLog().debug(message);
+            }
+
+            @Override
+            public void info(String message) {
+                getLog().info(message);
+            }
+
+            @Override
+            public void warn(String message) {
+                getLog().warn(message);
+            }
+
+            @Override
+            public void error(String message) {
+                getLog().error(message);
+            }
         });
     }
 

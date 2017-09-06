@@ -37,7 +37,8 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 @Mojo(
         name = "jar",
         requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME,
-        defaultPhase = LifecyclePhase.PACKAGE
+        defaultPhase = LifecyclePhase.PACKAGE,
+        requiresDirectInvocation = true
 )
 // when calling "mvn jfx:jar", we have to make sure to call "mvn jar:jar" too, as we require the jar-file
 @Execute(

@@ -23,7 +23,8 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 @Mojo(
         name = "generate-key-store",
         requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME,
-        defaultPhase = LifecyclePhase.VALIDATE
+        defaultPhase = LifecyclePhase.VALIDATE,
+        requiresDirectInvocation = true
 )
 public class CliGenerateKeyStoreMojo extends GenerateKeyStoreMojo {
 

@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-import org.apache.maven.plugin.logging.Log;
 
 /**
  *
@@ -54,7 +53,7 @@ public class FileHelper {
         }
     }
 
-    public void copyRecursive(Path sourceFolder, Path targetFolder, LoggerCall warnLogger) throws IOException {
+    public void copyRecursive(Path sourceFolder, Path targetFolder, BuildLogger buildLogger) throws IOException {
         Files.walkFileTree(sourceFolder, new FileVisitor<Path>() {
 
             @Override
@@ -74,7 +73,7 @@ public class FileHelper {
             @Override
             public FileVisitResult visitFileFailed(Path source, IOException ioe) throws IOException {
                 // don't fail, just inform user
-                warnLogger.log(String.format("Couldn't copy resource %s with reason %s", source.toString(), ioe.getLocalizedMessage()));
+                buildLogger.warn(String.format("Couldn't copy resource %s with reason %s", source.toString(), ioe.getLocalizedMessage()));
                 return FileVisitResult.CONTINUE;
             }
 

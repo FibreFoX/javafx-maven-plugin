@@ -23,19 +23,84 @@ import org.apache.maven.plugins.annotations.Parameter;
  */
 public class WorkaroundSwitches {
 
-    @Parameter
+    /**
+     * Since Java version 1.8.0 Update 40 the native launcher for linux was changed and includes a bug
+     * while searching for the generated configfile. This results in wrong ouput like this:
+     * <pre>
+     * client-1.1 No main class specified
+     * client-1.1 Failed to launch JVM
+     * </pre>
+     * <p>
+     * Scenario (which would work on windows):
+     * <p>
+     * <ul>
+     * <li>generated launcher: i-am.working.1.2.0-SNAPSHOT</li>
+     * <li>launcher-algorithm extracts the "extension" (a concept not known in linux-space for executables) and now searches for i-am.working.1.2.cfg</li>
+     * </ul>
+     * <p>
+     * Change this to "true" when you don't want this workaround.
+     *
+     * @see https://github.com/javafx-maven-plugin/javafx-maven-plugin/issues/124
+     */
+    @Parameter(property = "jfx.skipNativeLauncherWorkaround124", defaultValue = "false")
     protected boolean skipNativeLauncherWorkaround124;
-    @Parameter
+
+    /**
+     * Since Java version 1.8.0 Update 60 the native launcher configuration for windows was changed
+     * and includes a bug: the file-format before was "property-file", now it's "INI-file" per default,
+     * but the runtime-configuration isn't honored like in property-files.
+     * This workaround enforces the property-file-format.
+     * <p>
+     * Change this to "true" when you don't want this workaround.
+     *
+     * @see https://github.com/javafx-maven-plugin/javafx-maven-plugin/issues/167
+     */
+    @Parameter(property = "jfx.skipNativeLauncherWorkaround167", defaultValue = "false")
     protected boolean skipNativeLauncherWorkaround167;
-    @Parameter
+
+    /**
+     * Since Java version 1.8.0 Update 60 a new bundler for generating JNLP-files was presented and includes
+     * a bug while generating relative file-references when building on windows.
+     * <p>
+     * Change this to "true" when you don't want this workaround.
+     */
+    @Parameter(property = "jfx.skipJNLPRessourcePathWorkaround182")
     protected boolean skipJNLPRessourcePathWorkaround182;
-    @Parameter
+
+    /**
+     * Since Java version 1.8.0 Update 60 a new bundler for generating JNLP-files was introduced,
+     * but lacks the ability to sign jar-files by passing some flag. We are signing the files in the
+     * case of having "jnlp" as bundler. The MOJO with the goal "build-web" was deprecated in favor
+     * of that new bundler (mostly because the old one does not fit the bundler-list strategy).
+     * <p>
+     * Change this to "true" when you don't want signing jar-files.
+     */
+    @Parameter(property = "jfx.skipSigningJarFilesJNLP185", defaultValue = "false")
     protected boolean skipSigningJarFilesJNLP185;
-    @Parameter
+
+    /**
+     * After signing is done, the sizes inside generated JNLP-files still point to unsigned jar-file sizes,
+     * so we have to fix these sizes to be correct. This sizes-fix even lacks in the old web-MOJO.
+     * <p>
+     * Change this to "true" when you don't want to recalculate sizes of jar-files.
+     */
+    @Parameter(property = "jfx.skipSizeRecalculationForJNLP185", defaultValue = "false")
     protected boolean skipSizeRecalculationForJNLP185;
-    @Parameter
+
+    /**
+     * Same problem as workaround for bug 124 for native launchers, but this time regarding
+     * created native installers, where the workaround didn't apply.
+     * <p>
+     * Change this to "true" when you don't want this workaround.
+     * <p>
+     * Requires skipNativeLauncherWorkaround124 to be false.
+     *
+     * @see https://github.com/javafx-maven-plugin/javafx-maven-plugin/issues/205
+     */
+    @Parameter(property = "jfx.skipNativeLauncherWorkaround205", defaultValue = "false")
     protected boolean skipNativeLauncherWorkaround205;
-    @Parameter
+
+    @Parameter(property = "jfx.skipMacBundlerWorkaround", defaultValue = "false")
     protected boolean skipMacBundlerWorkaround = false;
 
     public boolean isSkipNativeLauncherWorkaround124() {

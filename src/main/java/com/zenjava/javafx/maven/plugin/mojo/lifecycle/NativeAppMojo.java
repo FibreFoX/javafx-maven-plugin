@@ -15,12 +15,37 @@
  */
 package com.zenjava.javafx.maven.plugin.mojo.lifecycle;
 
+import com.zenjava.javafx.maven.plugin.AbstractJfxMojo;
+import com.zenjava.javafx.maven.plugin.settings.FeatureSwitches;
+import com.zenjava.javafx.maven.plugin.settings.JfxJarSettings;
+import com.zenjava.javafx.maven.plugin.settings.KeystoreSettings;
+import com.zenjava.javafx.maven.plugin.settings.NativeAppSettings;
+import com.zenjava.javafx.maven.plugin.settings.WorkaroundSwitches;
+import com.zenjava.javafx.maven.plugin.utils.BuildLogger;
+import com.zenjava.javafx.maven.plugin.workers.NativeAppWorker;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
 
 /**
  * EXPERIMENTAL
  */
 @Mojo(name = "build-native-app")
-public class NativeAppMojo {
+public class NativeAppMojo extends AbstractJfxMojo {
+
+    @Override
+    public void execute() throws MojoExecutionException, MojoFailureException {
+        if( skip ){
+            getLog().info("Skipping execution of NativeAppMojo");
+            return;
+        }
+        NativeAppWorker nativeAppWorker = new NativeAppWorker();
+        nativeAppWorker.execute(baseSettings, new JfxJarSettings(), new NativeAppSettings(), new KeystoreSettings(), new FeatureSwitches(), new WorkaroundSwitches(), new BuildLogger() {
+            @Override
+            public void info(String message) {
+                getLog().info(message);
+            }
+        });
+    }
 
 }

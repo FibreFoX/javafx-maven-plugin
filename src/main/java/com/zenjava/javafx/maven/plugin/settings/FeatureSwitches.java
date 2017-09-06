@@ -33,17 +33,51 @@ public class FeatureSwitches {
      */
     @Parameter(property = "jfx.feature.useEnvironmentRelativeExecutables", defaultValue = "true")
     protected boolean useEnvironmentRelativeExecutables = true;
-    @Parameter
+
+    /**
+     * JavaFX introduced a new way for signing jar-files, which was called "BLOB signing".
+     * <p>
+     * The tool "jarsigner" is not able to verify that signature and webstart doesn't
+     * accept that format either. For not having to call jarsigner yourself, this is set to "true"
+     * for having your jar-files getting signed when generating JNLP-files.
+     *
+     * @see https://github.com/javafx-maven-plugin/javafx-maven-plugin/issues/190
+     */
+    // TODO make signing being done even without jnlp-context
+    @Parameter(property = "jfx.noBlobSigning", defaultValue = "true")
     protected boolean noBlobSigning;
     @Parameter
     protected boolean onlyCustomBundlers = false;
-    @Parameter
+
+    /**
+     * Most bundlers do not like dashes or anything than digits and dots as version number,
+     * therefor we remove all "non-digit"- and "non-dot"-chars. Most use-case is when having
+     * some "1.0.0-SNAPSHOT" as version-string. If you do know what you are doing, you can set
+     * this to true for skipping the removal of the "evil" chars.
+     *
+     * @since 8.8.0
+     */
+    @Parameter(property = "jfx.skipNativeVersionNumberSanitizing", defaultValue = "false")
     protected boolean skipNativeVersionNumberSanitizing = false;
-    @Parameter
+
+    /**
+     * Set this to true, to not scan for the specified main class inside the generated/copied jar-files.
+     * <p>
+     * Check only works for the main launcher, any secondary launchers are not checked.
+     */
+    @Parameter(property = "jfx.skipMainClassScanning", defaultValue = "false")
     protected boolean skipMainClassScanning = false;
-    @Parameter
+
+    /**
+     * Set this to true to disable the file-existence check on the keystore.
+     */
+    @Parameter(property = "jfx.skipKeyStoreChecking", defaultValue = "false")
     protected boolean skipKeyStoreChecking = false;
-    @Parameter
+
+    /**
+     * Set this to true to remove "-keypass"-part while signing via jarsigner.
+     */
+    @Parameter(property = "jfx.skipKeypassWhileSigning", defaultValue = "false")
     protected boolean skipKeypassWhileSigning = false;
 
     public boolean isUseEnvironmentRelativeExecutables() {

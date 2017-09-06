@@ -30,6 +30,11 @@ public class JavaTools {
     public static final boolean IS_JAVA_8 = isJavaVersion(8);
     public static final boolean IS_JAVA_9 = !IS_JAVA_8 && isJavaVersion(9) || isJavaVersion(9, true);
 
+    public static final String OPERATING_SYSTEM = System.getProperty("os.name").toLowerCase();
+    public static final boolean IS_WINDOWS = OPERATING_SYSTEM.contains("win");
+    public static final boolean IS_LINUX = OPERATING_SYSTEM.contains("nix") || OPERATING_SYSTEM.contains("nux");
+    public static final boolean IS_MAC = OPERATING_SYSTEM.contains("mac");
+
     public static boolean isJavaVersion(int oracleJavaVersion, boolean noVersionOne) {
         String javaVersion = System.getProperty("java.version");
         if( noVersionOne ){

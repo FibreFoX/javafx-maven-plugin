@@ -22,7 +22,8 @@ import org.apache.maven.plugins.annotations.Mojo;
  * EXPERIMENTAL
  */
 @Mojo(
-        name = "native-installer"
+        name = "native-installer",
+        requiresDirectInvocation = true
 )
 public class CliNativeInstallerMojo extends NativeInstallerMojo {
 
